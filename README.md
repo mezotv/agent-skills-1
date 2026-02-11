@@ -48,7 +48,7 @@ A comprehensive guide and best practices for working with Neon Serverless Postgr
 ## Installation
 
 ```bash
-npx add-skill neondatabase/agent-skills
+npx skills add neondatabase/agent-skills
 ```
 
 ### Claude Code Plugin
