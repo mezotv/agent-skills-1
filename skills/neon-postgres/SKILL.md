@@ -28,7 +28,7 @@ The docs index lists every available page with its URL and a short description:
 https://neon.com/docs/llms.txt
 ```
 
-Don't guess doc URLs. Use the `llms.txt` index or the tables below to find the relevant page.
+Common doc URLs are listed in the tables below. If you need a page not listed here, search the [docs index](https://neon.com/docs/llms.txt) — don't guess URLs.
 
 ### Common Documentation Paths
 
