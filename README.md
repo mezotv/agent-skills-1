@@ -57,7 +57,7 @@ You can also install the skills as a Claude Code plugin, which bundles both the 
 
 ```
 /plugin marketplace add neondatabase/agent-skills
-/plugin install neon-postgres@neon-agent-skills
+/plugin install neon-postgres@neon
 ```
 
 After installation, you'll be prompted to authenticate with Neon via OAuth when you first use MCP tools.
