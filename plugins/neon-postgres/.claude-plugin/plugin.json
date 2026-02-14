@@ -1,0 +1,15 @@
+{
+  "name": "neon",
+  "version": "1.0.0",
+  "description": "Neon Serverless Postgres integration. Includes best practices for Neon development and the Neon MCP Server for natural language database management.",
+  "author": {
+    "name": "Neon",
+    "url": "https://neon.com"
+  },
+  "homepage": "https://neon.com",
+  "repository": "https://github.com/neondatabase/agent-skills",
+  "license": "Apache-2.0",
+  "keywords": ["neon", "postgres", "serverless", "database", "mcp"],
+  "skills": "./skills/",
+  "mcpServers": "./mcp.json"
+}

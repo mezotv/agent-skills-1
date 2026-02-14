@@ -62,6 +62,19 @@ You can also install the skills as a Claude Code plugin, which bundles both the 
 
 After installation, you'll be prompted to authenticate with Neon via OAuth when you first use MCP tools.
 
+The top-level `skills/` directory remains the source of truth. Plugin folders symlink only the skill directories they expose.
+
+### Cursor Plugin
+
+This repository also includes Cursor plugin packaging with the same scope as the Claude plugin, using a multi-plugin layout so each plugin is self-contained under `plugins/`.
+
+- `plugins/neon-postgres/` contains plugin-specific files (`.cursor-plugin/plugin.json`, branding assets)
+- both plugin manifests are co-located in `plugins/neon-postgres/` (`.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json`)
+- `plugins/neon-postgres/skills/neon-postgres` is a symlink to top-level `skills/neon-postgres`
+- `plugins/neon-postgres/mcp.json` is plugin-local MCP config
+
+Cursor marketplace metadata is in `.cursor-plugin/marketplace.json`.
+
 ## Usage
 
 Example prompts:

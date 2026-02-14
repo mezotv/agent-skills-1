@@ -1,0 +1,19 @@
+{
+  "name": "neon-agent-skills",
+  "owner": {
+    "name": "Andre Landgraf",
+    "email": "andre@neon.tech"
+  },
+  "metadata": {
+    "description": "Official Neon agent skills for Cursor",
+    "version": "1.0.0",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "neon-postgres",
+      "source": "neon-postgres",
+      "description": "Neon Serverless Postgres integration - skills and MCP server"
+    }
+  ]
+}
