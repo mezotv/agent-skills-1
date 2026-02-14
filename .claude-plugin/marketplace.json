@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "neon-postgres",
-      "source": "./",
+      "source": "./plugins/neon-postgres",
       "description": "Neon Serverless Postgres integration - skills and MCP server",
       "version": "1.0.0",
       "category": "database",
