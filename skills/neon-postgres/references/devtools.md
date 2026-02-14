@@ -101,9 +101,9 @@ See the [full MCP server docs](https://neon.com/docs/ai/neon-mcp-server.md) for 
 
 ## Documentation Resources
 
-| Topic              | URL                                              |
-| ------------------ | ------------------------------------------------ |
-| CLI Init Command   | https://neon.com/docs/reference/cli-init.md      |
-| VSCode Extension   | https://neon.com/docs/local/vscode-extension.md  |
-| MCP Server         | https://neon.com/docs/ai/neon-mcp-server.md      |
-| Neon CLI Reference | https://neon.com/docs/reference/neon-cli.md      |
+| Topic              | URL                                             |
+| ------------------ | ----------------------------------------------- |
+| CLI Init Command   | https://neon.com/docs/reference/cli-init.md     |
+| VSCode Extension   | https://neon.com/docs/local/vscode-extension.md |
+| MCP Server         | https://neon.com/docs/ai/neon-mcp-server.md     |
+| Neon CLI Reference | https://neon.com/docs/reference/neon-cli.md     |

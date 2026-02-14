@@ -54,7 +54,9 @@ async function readJsonFile(filePath, context) {
   try {
     return JSON.parse(raw);
   } catch (error) {
-    addError(`${context} contains invalid JSON (${filePath}): ${error.message}`);
+    addError(
+      `${context} contains invalid JSON (${filePath}): ${error.message}`,
+    );
     return null;
   }
 }
@@ -90,29 +92,54 @@ function extractPathValues(value) {
   return [];
 }
 
-async function validateReferencedPath(pluginDir, fieldName, pathValue, pluginName) {
+async function validateReferencedPath(
+  pluginDir,
+  fieldName,
+  pathValue,
+  pluginName,
+) {
   if (!isSafeRelativePath(pathValue)) {
-    addError(`${pluginName}: field "${fieldName}" has invalid relative path "${pathValue}".`);
+    addError(
+      `${pluginName}: field "${fieldName}" has invalid relative path "${pathValue}".`,
+    );
     return;
   }
   const resolved = path.resolve(pluginDir, pathValue);
   if (!(await pathExists(resolved))) {
-    addError(`${pluginName}: field "${fieldName}" references missing path "${pathValue}".`);
+    addError(
+      `${pluginName}: field "${fieldName}" references missing path "${pathValue}".`,
+    );
   }
 }
 
 async function main() {
-  const marketplacePath = path.join(repoRoot, ".claude-plugin", "marketplace.json");
-  const marketplace = await readJsonFile(marketplacePath, "Claude marketplace manifest");
+  const marketplacePath = path.join(
+    repoRoot,
+    ".claude-plugin",
+    "marketplace.json",
+  );
+  const marketplace = await readJsonFile(
+    marketplacePath,
+    "Claude marketplace manifest",
+  );
   if (!marketplace) {
     summarizeAndExit();
     return;
   }
 
-  if (typeof marketplace.name !== "string" || !marketplaceNamePattern.test(marketplace.name)) {
-    addError('Marketplace "name" must be lowercase kebab-case and start/end with an alphanumeric character.');
+  if (
+    typeof marketplace.name !== "string" ||
+    !marketplaceNamePattern.test(marketplace.name)
+  ) {
+    addError(
+      'Marketplace "name" must be lowercase kebab-case and start/end with an alphanumeric character.',
+    );
   }
-  if (!marketplace.owner || typeof marketplace.owner.name !== "string" || marketplace.owner.name.length === 0) {
+  if (
+    !marketplace.owner ||
+    typeof marketplace.owner.name !== "string" ||
+    marketplace.owner.name.length === 0
+  ) {
     addError('Marketplace "owner.name" is required.');
   }
   if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
@@ -129,11 +156,15 @@ async function main() {
       continue;
     }
     if (typeof entry.name !== "string" || !pluginNamePattern.test(entry.name)) {
-      addError(`${label}.name must be lowercase and use only alphanumerics, hyphens, and periods.`);
+      addError(
+        `${label}.name must be lowercase and use only alphanumerics, hyphens, and periods.`,
+      );
       continue;
     }
     if (seenNames.has(entry.name)) {
-      addError(`Duplicate plugin name in marketplace manifest: "${entry.name}"`);
+      addError(
+        `Duplicate plugin name in marketplace manifest: "${entry.name}"`,
+      );
     }
     seenNames.add(entry.name);
 
@@ -142,7 +173,9 @@ async function main() {
       continue;
     }
     if (!isSafeRelativePath(entry.source)) {
-      addError(`${label}.source is not a safe relative path: "${entry.source}"`);
+      addError(
+        `${label}.source is not a safe relative path: "${entry.source}"`,
+      );
       continue;
     }
 
@@ -152,12 +185,22 @@ async function main() {
     }
 
     const manifestPath = path.join(pluginDir, ".claude-plugin", "plugin.json");
-    const pluginManifest = await readJsonFile(manifestPath, `${entry.name} claude plugin manifest`);
+    const pluginManifest = await readJsonFile(
+      manifestPath,
+      `${entry.name} claude plugin manifest`,
+    );
     if (!pluginManifest) {
       continue;
     }
 
-    const fields = ["skills", "commands", "agents", "hooks", "mcpServers", "lspServers"];
+    const fields = [
+      "skills",
+      "commands",
+      "agents",
+      "hooks",
+      "mcpServers",
+      "lspServers",
+    ];
     for (const field of fields) {
       for (const value of extractPathValues(pluginManifest[field])) {
         await validateReferencedPath(pluginDir, field, value, entry.name);
@@ -166,7 +209,9 @@ async function main() {
 
     const mcpPath = path.join(pluginDir, "mcp.json");
     if (!(await pathExists(mcpPath))) {
-      addWarning(`${entry.name}: no mcp.json file found in plugin root (only needed when using MCP servers).`);
+      addWarning(
+        `${entry.name}: no mcp.json file found in plugin root (only needed when using MCP servers).`,
+      );
     }
   }
 

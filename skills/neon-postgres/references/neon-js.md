@@ -177,24 +177,24 @@ await client.from("items").upsert({ id: 1, name: "Updated", status: "active" });
 
 ### Filter Operators
 
-| Operator     | Example                                     |
-| ------------ | ------------------------------------------- |
-| `.eq()`      | `.eq("status", "active")`                   |
-| `.neq()`     | `.neq("status", "archived")`                |
-| `.gt()`      | `.gt("price", 100)`                         |
-| `.gte()`     | `.gte("price", 100)`                        |
-| `.lt()`      | `.lt("price", 100)`                         |
-| `.lte()`     | `.lte("price", 100)`                        |
-| `.like()`    | `.like("name", "%item%")`                   |
-| `.ilike()`   | `.ilike("name", "%item%")`                  |
-| `.is()`      | `.is("deleted_at", null)`                   |
-| `.in()`      | `.in("status", ["active", "pending"])`      |
-| `.contains()`| `.contains("tags", ["important"])`          |
-| `.or()`      | `.or("status.eq.active,price.gt.100")`      |
-| `.not()`     | `.not("status", "eq", "archived")`          |
-| `.order()`   | `.order("created_at", { ascending: false })`|
-| `.limit()`   | `.limit(10)`                                |
-| `.range()`   | `.range(0, 9)` (first 10 items)             |
+| Operator      | Example                                      |
+| ------------- | -------------------------------------------- |
+| `.eq()`       | `.eq("status", "active")`                    |
+| `.neq()`      | `.neq("status", "archived")`                 |
+| `.gt()`       | `.gt("price", 100)`                          |
+| `.gte()`      | `.gte("price", 100)`                         |
+| `.lt()`       | `.lt("price", 100)`                          |
+| `.lte()`      | `.lte("price", 100)`                         |
+| `.like()`     | `.like("name", "%item%")`                    |
+| `.ilike()`    | `.ilike("name", "%item%")`                   |
+| `.is()`       | `.is("deleted_at", null)`                    |
+| `.in()`       | `.in("status", ["active", "pending"])`       |
+| `.contains()` | `.contains("tags", ["important"])`           |
+| `.or()`       | `.or("status.eq.active,price.gt.100")`       |
+| `.not()`      | `.not("status", "eq", "archived")`           |
+| `.order()`    | `.order("created_at", { ascending: false })` |
+| `.limit()`    | `.limit(10)`                                 |
+| `.range()`    | `.range(0, 9)` (first 10 items)              |
 
 **Pagination formula**: `.range((page - 1) * pageSize, page * pageSize - 1)`
 
@@ -269,14 +269,20 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const { data, error } = await dbClient.from("posts").select();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { data, error } = await dbClient.from("posts").insert(body).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  const { data, error } = await dbClient
+    .from("posts")
+    .insert(body)
+    .select()
+    .single();
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json(data, { status: 201 });
 }
 ```
@@ -290,7 +296,10 @@ await client.auth.signIn.email({ email, password });
 await client.auth.signUp.email({ email, password, name });
 await client.auth.signOut();
 const { data: session } = await client.auth.getSession();
-await client.auth.signIn.social({ provider: "google", callbackURL: "/dashboard" });
+await client.auth.signIn.social({
+  provider: "google",
+  callbackURL: "/dashboard",
+});
 ```
 
 ### Supabase-Compatible API
@@ -305,14 +314,20 @@ const client = createClient({
 
 await client.auth.signInWithPassword({ email, password });
 await client.auth.signUp({ email, password });
-const { data: { session } } = await client.auth.getSession();
+const {
+  data: { session },
+} = await client.auth.getSession();
 ```
 
 ## Key Imports
 
 ```typescript
 // Main client
-import { createClient, SupabaseAuthAdapter, BetterAuthVanillaAdapter } from "@neondatabase/neon-js";
+import {
+  createClient,
+  SupabaseAuthAdapter,
+  BetterAuthVanillaAdapter,
+} from "@neondatabase/neon-js";
 
 // Server auth (Next.js) -- unified instance
 import { createNeonAuth } from "@neondatabase/neon-js/auth/next/server";
@@ -399,7 +414,9 @@ import { BetterAuthReactAdapter } from "@neondatabase/neon-js";
 
 // CORRECT
 import { BetterAuthReactAdapter } from "@neondatabase/neon-js/auth/react";
-auth: { adapter: BetterAuthReactAdapter() }  // Don't forget ()
+auth: {
+  adapter: BetterAuthReactAdapter();
+} // Don't forget ()
 ```
 
 ### CSS import conflicts

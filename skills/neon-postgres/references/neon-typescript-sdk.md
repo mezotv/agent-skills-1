@@ -37,76 +37,76 @@ const { data: projects } = await apiClient.listProjects({ org_id: orgId });
 
 ### Projects
 
-| Operation          | Method                                                              |
-| ------------------ | ------------------------------------------------------------------- |
-| List projects      | `apiClient.listProjects({ org_id })`                               |
+| Operation          | Method                                                                          |
+| ------------------ | ------------------------------------------------------------------------------- |
+| List projects      | `apiClient.listProjects({ org_id })`                                            |
 | Create project     | `apiClient.createProject({ project: { name, pg_version, region_id, org_id } })` |
-| Get project        | `apiClient.getProject(projectId)`                                   |
-| Update project     | `apiClient.updateProject(projectId, { project: { name } })`        |
-| Delete project     | `apiClient.deleteProject(projectId)`                                |
-| Get connection URI | `apiClient.getConnectionUri({ projectId, database_name, role_name, pooled })` |
+| Get project        | `apiClient.getProject(projectId)`                                               |
+| Update project     | `apiClient.updateProject(projectId, { project: { name } })`                     |
+| Delete project     | `apiClient.deleteProject(projectId)`                                            |
+| Get connection URI | `apiClient.getConnectionUri({ projectId, database_name, role_name, pooled })`   |
 
 ### Branches
 
-| Operation     | Method                                                                    |
-| ------------- | ------------------------------------------------------------------------- |
+| Operation     | Method                                                                                  |
+| ------------- | --------------------------------------------------------------------------------------- |
 | Create branch | `apiClient.createProjectBranch(projectId, { branch: { name }, endpoints: [{ type }] })` |
-| List branches | `apiClient.listProjectBranches({ projectId })`                            |
-| Get branch    | `apiClient.getProjectBranch(projectId, branchId)`                         |
-| Update branch | `apiClient.updateProjectBranch(projectId, branchId, { branch: { name } })` |
-| Delete branch | `apiClient.deleteProjectBranch(projectId, branchId)`                      |
+| List branches | `apiClient.listProjectBranches({ projectId })`                                          |
+| Get branch    | `apiClient.getProjectBranch(projectId, branchId)`                                       |
+| Update branch | `apiClient.updateProjectBranch(projectId, branchId, { branch: { name } })`              |
+| Delete branch | `apiClient.deleteProjectBranch(projectId, branchId)`                                    |
 
 ### Databases
 
-| Operation       | Method                                                                         |
-| --------------- | ------------------------------------------------------------------------------ |
+| Operation       | Method                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------ |
 | Create database | `apiClient.createProjectBranchDatabase(projectId, branchId, { database: { name, owner_name } })` |
-| List databases  | `apiClient.listProjectBranchDatabases(projectId, branchId)`                    |
-| Delete database | `apiClient.deleteProjectBranchDatabase(projectId, branchId, databaseName)`     |
+| List databases  | `apiClient.listProjectBranchDatabases(projectId, branchId)`                                      |
+| Delete database | `apiClient.deleteProjectBranchDatabase(projectId, branchId, databaseName)`                       |
 
 ### Roles
 
-| Operation   | Method                                                                         |
-| ----------- | ------------------------------------------------------------------------------ |
-| Create role | `apiClient.createProjectBranchRole(projectId, branchId, { role: { name } })`  |
-| List roles  | `apiClient.listProjectBranchRoles(projectId, branchId)`                        |
-| Delete role | `apiClient.deleteProjectBranchRole(projectId, branchId, roleName)`             |
+| Operation   | Method                                                                       |
+| ----------- | ---------------------------------------------------------------------------- |
+| Create role | `apiClient.createProjectBranchRole(projectId, branchId, { role: { name } })` |
+| List roles  | `apiClient.listProjectBranchRoles(projectId, branchId)`                      |
+| Delete role | `apiClient.deleteProjectBranchRole(projectId, branchId, roleName)`           |
 
 ### Endpoints
 
-| Operation        | Method                                                                      |
-| ---------------- | --------------------------------------------------------------------------- |
+| Operation        | Method                                                                          |
+| ---------------- | ------------------------------------------------------------------------------- |
 | Create endpoint  | `apiClient.createProjectEndpoint(projectId, { endpoint: { branch_id, type } })` |
-| List endpoints   | `apiClient.listProjectEndpoints(projectId)`                                 |
-| Start endpoint   | `apiClient.startProjectEndpoint(projectId, endpointId)`                     |
-| Suspend endpoint | `apiClient.suspendProjectEndpoint(projectId, endpointId)`                   |
-| Restart endpoint | `apiClient.restartProjectEndpoint(projectId, endpointId)`                   |
-| Update endpoint  | `apiClient.updateProjectEndpoint(projectId, endpointId, { endpoint: {...} })` |
-| Delete endpoint  | `apiClient.deleteProjectEndpoint(projectId, endpointId)`                    |
+| List endpoints   | `apiClient.listProjectEndpoints(projectId)`                                     |
+| Start endpoint   | `apiClient.startProjectEndpoint(projectId, endpointId)`                         |
+| Suspend endpoint | `apiClient.suspendProjectEndpoint(projectId, endpointId)`                       |
+| Restart endpoint | `apiClient.restartProjectEndpoint(projectId, endpointId)`                       |
+| Update endpoint  | `apiClient.updateProjectEndpoint(projectId, endpointId, { endpoint: {...} })`   |
+| Delete endpoint  | `apiClient.deleteProjectEndpoint(projectId, endpointId)`                        |
 
 ### API Keys
 
-| Operation  | Method                                              |
-| ---------- | --------------------------------------------------- |
-| List keys  | `apiClient.listApiKeys()`                           |
-| Create key | `apiClient.createApiKey({ key_name })`              |
-| Revoke key | `apiClient.revokeApiKey(keyId)`                     |
+| Operation  | Method                                 |
+| ---------- | -------------------------------------- |
+| List keys  | `apiClient.listApiKeys()`              |
+| Create key | `apiClient.createApiKey({ key_name })` |
+| Revoke key | `apiClient.revokeApiKey(keyId)`        |
 
 ### Operations
 
-| Operation       | Method                                                        |
-| --------------- | ------------------------------------------------------------- |
-| List operations | `apiClient.listProjectOperations({ projectId })`              |
-| Get operation   | `apiClient.getProjectOperation(projectId, operationId)`       |
+| Operation       | Method                                                  |
+| --------------- | ------------------------------------------------------- |
+| List operations | `apiClient.listProjectOperations({ projectId })`        |
+| Get operation   | `apiClient.getProjectOperation(projectId, operationId)` |
 
 ### Organizations
 
-| Operation      | Method                                                               |
-| -------------- | -------------------------------------------------------------------- |
-| List user orgs | `apiClient.getCurrentUserOrganizations()`                            |
-| Get org        | `apiClient.getOrganization(orgId)`                                   |
-| List members   | `apiClient.getOrganizationMembers(orgId)`                            |
-| Create org key | `apiClient.createOrgApiKey(orgId, { key_name, project_id? })`       |
+| Operation      | Method                                                                   |
+| -------------- | ------------------------------------------------------------------------ |
+| List user orgs | `apiClient.getCurrentUserOrganizations()`                                |
+| Get org        | `apiClient.getOrganization(orgId)`                                       |
+| List members   | `apiClient.getOrganizationMembers(orgId)`                                |
+| Create org key | `apiClient.createOrgApiKey(orgId, { key_name, project_id? })`            |
 | Invite member  | `apiClient.createOrganizationInvitations(orgId, { invitations: [...] })` |
 
 ## Error Handling

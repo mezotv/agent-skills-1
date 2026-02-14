@@ -32,9 +32,9 @@ See the [official introduction](https://neon.com/docs/introduction.md) for compl
 
 ## Further Reading
 
-| Topic                  | URL                                                      |
-| ---------------------- | -------------------------------------------------------- |
+| Topic                  | URL                                                         |
+| ---------------------- | ----------------------------------------------------------- |
 | Architecture           | https://neon.com/docs/introduction/architecture-overview.md |
-| Plans & Billing        | https://neon.com/docs/introduction/about-billing.md      |
-| Regions                | https://neon.com/docs/introduction/regions.md            |
-| Postgres Compatibility | https://neon.com/docs/reference/compatibility.md         |
+| Plans & Billing        | https://neon.com/docs/introduction/about-billing.md         |
+| Regions                | https://neon.com/docs/introduction/regions.md               |
+| Postgres Compatibility | https://neon.com/docs/reference/compatibility.md            |

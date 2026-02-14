@@ -100,12 +100,12 @@ Then resume from where they left off.
 
 ## Documentation
 
-| Topic              | URL                                                    |
-| ------------------ | ------------------------------------------------------ |
-| Getting Started    | https://neon.com/docs/get-started/signing-up.md        |
-| Connecting to Neon | https://neon.com/docs/connect/connect-intro.md         |
-| Connection String  | https://neon.com/docs/connect/connect-from-any-app.md  |
-| Frameworks Guide   | https://neon.com/docs/get-started/frameworks.md        |
-| ORMs Guide         | https://neon.com/docs/get-started/orms.md              |
-| VSCode Extension   | https://neon.com/docs/local/vscode-extension.md        |
-| MCP Server         | https://neon.com/docs/ai/neon-mcp-server.md            |
+| Topic              | URL                                                   |
+| ------------------ | ----------------------------------------------------- |
+| Getting Started    | https://neon.com/docs/get-started/signing-up.md       |
+| Connecting to Neon | https://neon.com/docs/connect/connect-intro.md        |
+| Connection String  | https://neon.com/docs/connect/connect-from-any-app.md |
+| Frameworks Guide   | https://neon.com/docs/get-started/frameworks.md       |
+| ORMs Guide         | https://neon.com/docs/get-started/orms.md             |
+| VSCode Extension   | https://neon.com/docs/local/vscode-extension.md       |
+| MCP Server         | https://neon.com/docs/ai/neon-mcp-server.md           |

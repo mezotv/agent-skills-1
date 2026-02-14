@@ -1,7 +1,7 @@
 {
   "name": "neon",
   "version": "1.0.0",
-  "description": "Neon Serverless Postgres integration. Includes best practices for Neon development and the Neon MCP Server for natural language database management.",
+  "description": "Manage your Neon projects and databases with the neon-postgres agent skill and the Neon MCP Server",
   "author": {
     "name": "Neon",
     "url": "https://neon.com"

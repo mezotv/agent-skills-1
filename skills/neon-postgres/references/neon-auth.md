@@ -140,14 +140,14 @@ See the [React quickstart with UI components](https://neon.com/docs/auth/quick-s
 
 Use pre-built components instead of building custom auth forms.
 
-| Component              | Purpose                                   |
-| ---------------------- | ----------------------------------------- |
-| `AuthView`             | Sign-in, sign-up, forgot-password pages   |
-| `AccountView`          | Account settings, security pages          |
-| `UserButton`           | User avatar with dropdown menu            |
-| `SignedIn` / `SignedOut`| Conditional rendering based on auth state |
-| `RedirectToSignIn`     | Redirect unauthenticated users            |
-| `RedirectToSignUp`     | Redirect to sign-up page                  |
+| Component                | Purpose                                   |
+| ------------------------ | ----------------------------------------- |
+| `AuthView`               | Sign-in, sign-up, forgot-password pages   |
+| `AccountView`            | Account settings, security pages          |
+| `UserButton`             | User avatar with dropdown menu            |
+| `SignedIn` / `SignedOut` | Conditional rendering based on auth state |
+| `RedirectToSignIn`       | Redirect unauthenticated users            |
+| `RedirectToSignUp`       | Redirect to sign-up page                  |
 
 See the [UI components reference](https://neon.com/docs/auth/reference/ui-components.md) for full props and customization.
 
@@ -190,7 +190,7 @@ export default function RootLayout({ children }) {
       <body>
         <NeonAuthUIProvider
           authClient={authClient}
-          social={{ providers: ["google", "github", "vercel"] }}  // optional
+          social={{ providers: ["google", "github", "vercel"] }} // optional
         >
           {children}
         </NeonAuthUIProvider>
@@ -211,7 +211,11 @@ import { AuthView } from "@neondatabase/auth/react";
 
 export const dynamicParams = false;
 
-export default async function AuthPage({ params }: { params: Promise<{ path: string }> }) {
+export default async function AuthPage({
+  params,
+}: {
+  params: Promise<{ path: string }>;
+}) {
   const { path } = await params;
   return <AuthView path={path} />;
 }
@@ -233,7 +237,11 @@ export function generateStaticParams() {
   return Object.values(accountViewPaths).map((path) => ({ path }));
 }
 
-export default async function AccountPage({ params }: { params: Promise<{ path: string }> }) {
+export default async function AccountPage({
+  params,
+}: {
+  params: Promise<{ path: string }>;
+}) {
   const { path } = await params;
   return <AccountView path={path} />;
 }
@@ -256,17 +264,17 @@ import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
 
 ## Auth Methods Quick Reference
 
-| Method | Usage |
-| --- | --- |
-| `auth.signUp.email({ email, password, name })` | Create account (server) |
-| `auth.signIn.email({ email, password })` | Sign in (server) |
-| `auth.signIn.social({ provider, callbackURL })` | OAuth sign-in (server) |
-| `auth.signOut()` | Sign out (server) |
-| `auth.getSession()` | Get session (server, requires `force-dynamic`) |
-| `authClient.useSession()` | Session hook (client, needs React adapter) |
-| `authClient.getSession()` | Get session (client, no adapter needed) |
-| `authClient.signIn.email(...)` | Sign in (client) |
-| `authClient.signUp.email(...)` | Create account (client) |
+| Method                                          | Usage                                          |
+| ----------------------------------------------- | ---------------------------------------------- |
+| `auth.signUp.email({ email, password, name })`  | Create account (server)                        |
+| `auth.signIn.email({ email, password })`        | Sign in (server)                               |
+| `auth.signIn.social({ provider, callbackURL })` | OAuth sign-in (server)                         |
+| `auth.signOut()`                                | Sign out (server)                              |
+| `auth.getSession()`                             | Get session (server, requires `force-dynamic`) |
+| `authClient.useSession()`                       | Session hook (client, needs React adapter)     |
+| `authClient.getSession()`                       | Get session (client, no adapter needed)        |
+| `authClient.signIn.email(...)`                  | Sign in (client)                               |
+| `authClient.signUp.email(...)`                  | Create account (client)                        |
 
 ### Session Data
 
@@ -303,12 +311,19 @@ import { createAuthClient } from "@neondatabase/neon-js/auth";
 import { BetterAuthReactAdapter } from "@neondatabase/neon-js/auth/react";
 
 // UI components
-import { NeonAuthUIProvider, AuthView, AccountView, SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
+import {
+  NeonAuthUIProvider,
+  AuthView,
+  AccountView,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@neondatabase/auth/react";
 import { accountViewPaths } from "@neondatabase/auth/react/ui/server";
 
 // CSS (choose one, never both; path matches your package)
-import "@neondatabase/auth/ui/css";       // Next.js
-import "@neondatabase/neon-js/ui/css";    // React SPA
+import "@neondatabase/auth/ui/css"; // Next.js
+import "@neondatabase/neon-js/ui/css"; // React SPA
 // or in CSS: @import "@neondatabase/auth/ui/tailwind";      (Next.js)
 // or in CSS: @import "@neondatabase/neon-js/ui/tailwind";   (React SPA)
 ```
@@ -381,18 +396,18 @@ createAuthClient();
 
 ## Documentation
 
-| Topic                  | URL                                                              |
-| ---------------------- | ---------------------------------------------------------------- |
-| Auth Overview          | https://neon.com/docs/auth/overview.md                           |
-| Next.js Quickstart     | https://neon.com/docs/auth/quick-start/nextjs.md                 |
-| Next.js API-only       | https://neon.com/docs/auth/quick-start/nextjs-api-only.md        |
-| React with UI          | https://neon.com/docs/auth/quick-start/react-router-components.md|
-| React API Methods      | https://neon.com/docs/auth/quick-start/react.md                  |
-| TanStack Router        | https://neon.com/docs/auth/quick-start/tanstack-router.md        |
-| Server SDK Reference   | https://neon.com/docs/auth/reference/nextjs-server.md            |
-| UI Components Ref      | https://neon.com/docs/auth/reference/ui-components.md            |
-| Client SDK Reference   | https://neon.com/docs/reference/javascript-sdk.md                |
-| v0.1 Migration Guide   | https://neon.com/docs/auth/migrate/from-auth-v0.1.md             |
-| OAuth Setup            | https://neon.com/docs/auth/guides/setup-oauth.md                 |
-| Email Verification     | https://neon.com/docs/auth/guides/email-verification.md          |
-| Branching Auth         | https://neon.com/docs/auth/branching-authentication.md           |
+| Topic                | URL                                                               |
+| -------------------- | ----------------------------------------------------------------- |
+| Auth Overview        | https://neon.com/docs/auth/overview.md                            |
+| Next.js Quickstart   | https://neon.com/docs/auth/quick-start/nextjs.md                  |
+| Next.js API-only     | https://neon.com/docs/auth/quick-start/nextjs-api-only.md         |
+| React with UI        | https://neon.com/docs/auth/quick-start/react-router-components.md |
+| React API Methods    | https://neon.com/docs/auth/quick-start/react.md                   |
+| TanStack Router      | https://neon.com/docs/auth/quick-start/tanstack-router.md         |
+| Server SDK Reference | https://neon.com/docs/auth/reference/nextjs-server.md             |
+| UI Components Ref    | https://neon.com/docs/auth/reference/ui-components.md             |
+| Client SDK Reference | https://neon.com/docs/reference/javascript-sdk.md                 |
+| v0.1 Migration Guide | https://neon.com/docs/auth/migrate/from-auth-v0.1.md              |
+| OAuth Setup          | https://neon.com/docs/auth/guides/setup-oauth.md                  |
+| Email Verification   | https://neon.com/docs/auth/guides/email-verification.md           |
+| Branching Auth       | https://neon.com/docs/auth/branching-authentication.md            |

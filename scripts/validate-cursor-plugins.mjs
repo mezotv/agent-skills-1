@@ -54,7 +54,9 @@ async function readJsonFile(filePath, context) {
   try {
     return JSON.parse(raw);
   } catch (error) {
-    addError(`${context} contains invalid JSON (${filePath}): ${error.message}`);
+    addError(
+      `${context} contains invalid JSON (${filePath}): ${error.message}`,
+    );
     return null;
   }
 }
@@ -144,42 +146,73 @@ function extractPathValues(value) {
   return [];
 }
 
-async function validateReferencedPath(pluginDir, fieldName, pathValue, pluginName) {
+async function validateReferencedPath(
+  pluginDir,
+  fieldName,
+  pathValue,
+  pluginName,
+) {
   if (pathValue.startsWith("http://") || pathValue.startsWith("https://")) {
     return;
   }
   if (!isSafeRelativePath(pathValue)) {
     addError(
-      `${pluginName}: field "${fieldName}" has invalid path "${pathValue}". Use a relative path without ".." or absolute prefixes.`
+      `${pluginName}: field "${fieldName}" has invalid path "${pathValue}". Use a relative path without ".." or absolute prefixes.`,
     );
     return;
   }
   const resolved = path.resolve(pluginDir, pathValue);
   if (!(await pathExists(resolved))) {
-    addError(`${pluginName}: field "${fieldName}" references missing path "${pathValue}".`);
+    addError(
+      `${pluginName}: field "${fieldName}" references missing path "${pathValue}".`,
+    );
   }
 }
 
-async function validateFrontmatterFile(filePath, componentName, requiredKeys, pluginName) {
+async function validateFrontmatterFile(
+  filePath,
+  componentName,
+  requiredKeys,
+  pluginName,
+) {
   const content = await fs.readFile(filePath, "utf8");
   const parsed = parseFrontmatter(content);
   const relativeFile = path.relative(repoRoot, filePath);
   if (!parsed) {
-    addError(`${pluginName}: ${componentName} file missing YAML frontmatter: ${relativeFile}`);
+    addError(
+      `${pluginName}: ${componentName} file missing YAML frontmatter: ${relativeFile}`,
+    );
     return;
   }
   for (const key of requiredKeys) {
     if (!parsed[key] || parsed[key].length === 0) {
-      addError(`${pluginName}: ${componentName} file missing "${key}" in frontmatter: ${relativeFile}`);
+      addError(
+        `${pluginName}: ${componentName} file missing "${key}" in frontmatter: ${relativeFile}`,
+      );
     }
   }
 }
 
 async function validateComponentFrontmatter(pluginDir, pluginName) {
   const checks = [
-    { dir: "rules", exts: [".md", ".mdc", ".markdown"], component: "rule", required: ["description"] },
-    { dir: "agents", exts: [".md", ".mdc", ".markdown"], component: "agent", required: ["name", "description"] },
-    { dir: "commands", exts: [".md", ".mdc", ".markdown", ".txt"], component: "command", required: ["name", "description"] },
+    {
+      dir: "rules",
+      exts: [".md", ".mdc", ".markdown"],
+      component: "rule",
+      required: ["description"],
+    },
+    {
+      dir: "agents",
+      exts: [".md", ".mdc", ".markdown"],
+      component: "agent",
+      required: ["name", "description"],
+    },
+    {
+      dir: "commands",
+      exts: [".md", ".mdc", ".markdown", ".txt"],
+      component: "command",
+      required: ["name", "description"],
+    },
   ];
 
   for (const check of checks) {
@@ -190,7 +223,12 @@ async function validateComponentFrontmatter(pluginDir, pluginName) {
     const files = await walkFiles(dirPath);
     for (const file of files) {
       if (check.exts.includes(path.extname(file).toLowerCase())) {
-        await validateFrontmatterFile(file, check.component, check.required, pluginName);
+        await validateFrontmatterFile(
+          file,
+          check.component,
+          check.required,
+          pluginName,
+        );
       }
     }
   }
@@ -200,7 +238,12 @@ async function validateComponentFrontmatter(pluginDir, pluginName) {
     const files = await walkFiles(skillsDir);
     for (const file of files) {
       if (path.basename(file) === "SKILL.md") {
-        await validateFrontmatterFile(file, "skill", ["name", "description"], pluginName);
+        await validateFrontmatterFile(
+          file,
+          "skill",
+          ["name", "description"],
+          pluginName,
+        );
       }
     }
   }
@@ -215,24 +258,43 @@ function resolveMarketplaceSource(source, pluginRoot) {
   }
   const normalizedRoot = pluginRoot.replace(/\\/g, "/").replace(/\/+$/, "");
   const normalizedSource = source.replace(/\\/g, "/");
-  if (normalizedSource === normalizedRoot || normalizedSource.startsWith(`${normalizedRoot}/`)) {
+  if (
+    normalizedSource === normalizedRoot ||
+    normalizedSource.startsWith(`${normalizedRoot}/`)
+  ) {
     return normalizedSource;
   }
   return `${normalizedRoot}/${normalizedSource}`;
 }
 
 async function main() {
-  const marketplacePath = path.join(repoRoot, ".cursor-plugin", "marketplace.json");
-  const marketplace = await readJsonFile(marketplacePath, "Cursor marketplace manifest");
+  const marketplacePath = path.join(
+    repoRoot,
+    ".cursor-plugin",
+    "marketplace.json",
+  );
+  const marketplace = await readJsonFile(
+    marketplacePath,
+    "Cursor marketplace manifest",
+  );
   if (!marketplace) {
     summarizeAndExit();
     return;
   }
 
-  if (typeof marketplace.name !== "string" || !marketplaceNamePattern.test(marketplace.name)) {
-    addError('Marketplace "name" must be lowercase kebab-case and start/end with an alphanumeric character.');
+  if (
+    typeof marketplace.name !== "string" ||
+    !marketplaceNamePattern.test(marketplace.name)
+  ) {
+    addError(
+      'Marketplace "name" must be lowercase kebab-case and start/end with an alphanumeric character.',
+    );
   }
-  if (!marketplace.owner || typeof marketplace.owner.name !== "string" || marketplace.owner.name.length === 0) {
+  if (
+    !marketplace.owner ||
+    typeof marketplace.owner.name !== "string" ||
+    marketplace.owner.name.length === 0
+  ) {
     addError('Marketplace "owner.name" is required.');
   }
   if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
@@ -244,9 +306,14 @@ async function main() {
   const pluginRoot = marketplace.metadata?.pluginRoot;
   if (pluginRoot !== undefined) {
     if (typeof pluginRoot !== "string" || !isSafeRelativePath(pluginRoot)) {
-      addError('Marketplace "metadata.pluginRoot" must be a safe relative path.');
+      addError(
+        'Marketplace "metadata.pluginRoot" must be a safe relative path.',
+      );
     } else {
-      await ensureDirectory(path.join(repoRoot, pluginRoot), 'Marketplace "metadata.pluginRoot"');
+      await ensureDirectory(
+        path.join(repoRoot, pluginRoot),
+        'Marketplace "metadata.pluginRoot"',
+      );
     }
   }
 
@@ -258,11 +325,15 @@ async function main() {
       continue;
     }
     if (typeof entry.name !== "string" || !pluginNamePattern.test(entry.name)) {
-      addError(`${label}.name must be lowercase and use only alphanumerics, hyphens, and periods.`);
+      addError(
+        `${label}.name must be lowercase and use only alphanumerics, hyphens, and periods.`,
+      );
       continue;
     }
     if (seenNames.has(entry.name)) {
-      addError(`Duplicate plugin name in marketplace manifest: "${entry.name}"`);
+      addError(
+        `Duplicate plugin name in marketplace manifest: "${entry.name}"`,
+      );
     }
     seenNames.add(entry.name);
 
@@ -282,19 +353,37 @@ async function main() {
     }
 
     const manifestPath = path.join(pluginDir, ".cursor-plugin", "plugin.json");
-    const pluginManifest = await readJsonFile(manifestPath, `${entry.name} cursor plugin manifest`);
+    const pluginManifest = await readJsonFile(
+      manifestPath,
+      `${entry.name} cursor plugin manifest`,
+    );
     if (!pluginManifest) {
       continue;
     }
 
-    if (typeof pluginManifest.name !== "string" || !pluginNamePattern.test(pluginManifest.name)) {
-      addError(`${entry.name}: "name" in plugin.json must be lowercase and use only alphanumerics, hyphens, and periods.`);
+    if (
+      typeof pluginManifest.name !== "string" ||
+      !pluginNamePattern.test(pluginManifest.name)
+    ) {
+      addError(
+        `${entry.name}: "name" in plugin.json must be lowercase and use only alphanumerics, hyphens, and periods.`,
+      );
     }
     if (pluginManifest.name && pluginManifest.name !== entry.name) {
-      addError(`${entry.name}: marketplace entry name does not match plugin.json name ("${pluginManifest.name}").`);
+      addError(
+        `${entry.name}: marketplace entry name does not match plugin.json name ("${pluginManifest.name}").`,
+      );
     }
 
-    for (const field of ["logo", "rules", "skills", "agents", "commands", "hooks", "mcpServers"]) {
+    for (const field of [
+      "logo",
+      "rules",
+      "skills",
+      "agents",
+      "commands",
+      "hooks",
+      "mcpServers",
+    ]) {
       for (const value of extractPathValues(pluginManifest[field])) {
         await validateReferencedPath(pluginDir, field, value, entry.name);
       }
@@ -304,7 +393,9 @@ async function main() {
 
     const hooksPath = path.join(pluginDir, "hooks", "hooks.json");
     if (!(await pathExists(hooksPath))) {
-      addWarning(`${entry.name}: no hooks/hooks.json file found (only needed when using hooks).`);
+      addWarning(
+        `${entry.name}: no hooks/hooks.json file found (only needed when using hooks).`,
+      );
     }
   }
 
