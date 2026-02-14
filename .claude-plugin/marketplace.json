@@ -5,14 +5,14 @@
     "email": "andre@neon.tech"
   },
   "metadata": {
-    "description": "Official Neon agent skills for Claude Code",
+    "description": "Official Neon Serverless Postgres plugins for Claude Code",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "neon-postgres",
       "source": "./plugins/neon-postgres",
-      "description": "Neon Serverless Postgres integration - skills and MCP server",
+      "description": "Manage your Neon projects and databases with theneon-postgres agent skill and the Neon MCP Server",
       "version": "1.0.0",
       "category": "database",
       "tags": ["postgres", "serverless", "database", "mcp", "neon"]

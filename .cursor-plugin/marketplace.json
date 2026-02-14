@@ -5,7 +5,7 @@
     "email": "andre@neon.tech"
   },
   "metadata": {
-    "description": "Official Neon agent skills for Cursor",
+    "description": "Official Neon Serverless Postgres plugins for Cursor",
     "version": "1.0.0",
     "pluginRoot": "plugins"
   },
@@ -13,7 +13,7 @@
     {
       "name": "neon-postgres",
       "source": "neon-postgres",
-      "description": "Neon Serverless Postgres integration - skills and MCP server"
+      "description": "Manage your Neon projects and databases with theneon-postgres agent skill and the Neon MCP Server"
     }
   ]
 }
