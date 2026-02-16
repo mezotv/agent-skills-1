@@ -45,6 +45,12 @@ The top-level `skills/` directory remains the source of truth. Plugin folders sy
 
 This repository also includes Cursor plugin packaging with the same scope as the Claude plugin (neon-postgres agent skill and Neon MCP Server)
 
+Run this command in chat:
+
+```text
+/add-plugin neon-postgres
+```
+
 ## Usage
 
 Example prompts:
