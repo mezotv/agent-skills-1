@@ -24,3 +24,6 @@ jobs:
 
       - name: Validate Cursor and Claude plugins
         run: npm run validate:plugins
+
+      - name: Validate Neon skill
+        run: npm run validate:skills
