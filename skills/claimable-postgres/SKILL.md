@@ -1,5 +1,5 @@
 ---
-name: claimable-postgres-databases
+name: claimable-postgres
 description: >-
   Provision instant temporary Postgres databases via Claimable Postgres by Neon
   (pg.new) with no login, signup, or credit card. Use when users ask for a
@@ -9,7 +9,7 @@ description: >-
   DATABASE_URL".
 ---
 
-# Claimable Postgres Databases
+# Claimable Postgres
 
 Create an instant Postgres database with Claimable Postgres by Neon (`pg.new`) for fast local development, demos, prototyping, and test environments.
 
