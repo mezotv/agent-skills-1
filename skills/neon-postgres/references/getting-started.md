@@ -2,13 +2,38 @@
 
 Interactive guide for setting up a Neon project and connecting it to code.
 
-See the [official getting started guide](https://neon.com/docs/get-started/signing-up.md) for complete details.
+## Check Status Quo
+
+Inspect the user's codebase and environment to see if they have already integrated Neon and to better understand their needs and constraints.
+
+Specifically check for:
+
+- Existing database connection code
+- Existing Neon MCP server or Neon CLI configuration
+- Existence of a `.env` file and `DATABASE_URL` environment variable
+- Existing ORM (Prisma, Drizzle, TypeORM) configuration
+
+## Self-Driving Setup With Neon's CLI or MCP Server
+
+You can offer the user to inspect the existing connected Neon projects or create new ones using the Neon CLI or MCP server.
+
+If the MCP server and CLI aren't set up yet, ask the user for permission to run:
+
+```bash
+npx neonctl@latest init
+```
+
+This will install the Neon VSCode extension (if applicable) and the Neon MCP server and `neon-postgres` agent skill. Alternatively, you can offer to install the Neon CLI. Install instructions here: https://neon.com/docs/reference/cli-install.md
+
+Either CLI or MCP server can be used to manage Neon projects and databases on the user's behalf. If the user prefers to manually get started with Neon, then you can guide them through the setup process instead of using the CLI or MCP server directly. See `devtools.md` for details.
+
+Since the Neon CLI and MCP server do interact with database resources, it's important to verify the user is comfortable with the security implications of running these tools.
 
 ## Setup Flow
 
 ### 1. Select Organization and Project
 
-- Check existing organizations and projects (via MCP server or CLI)
+- Check existing organizations and projects (via MCP server or CLI or manually by the user)
 - **1 organization**: default to it
 - **Multiple organizations**: list all and ask which to use
 - **No projects**: ask if they want to create a new project
@@ -32,27 +57,17 @@ DATABASE_URL=postgresql://user:password@host/database
 3. If unreadable (permissions): use append command or show the line to add manually
 4. Never overwrite an existing `.env` — always append or update in place
 
-### 3. Install Driver
+### 3. Pick Connection Method & Pick Driver
 
-Choose based on deployment platform. For detailed guidance, see `connection-methods.md`.
+Refer to `connection-methods.md` to pick the correct connection method and driver based on your deployment platform.
 
-| Environment              | Driver                     | Install                                |
-| ------------------------ | -------------------------- | -------------------------------------- |
-| Vercel (Edge/Serverless) | `@neondatabase/serverless` | `npm install @neondatabase/serverless` |
-| Cloudflare Workers       | `@neondatabase/serverless` | `npm install @neondatabase/serverless` |
-| AWS Lambda               | `@neondatabase/serverless` | `npm install @neondatabase/serverless` |
-| Traditional Node.js      | `pg`                       | `npm install pg`                       |
-| Long-running servers     | `pg` with pooling          | `npm install pg`                       |
-
-For serverless driver patterns, see `neon-serverless.md`. For complex scenarios (multiple runtimes, hybrid architectures), see `connection-methods.md`.
-
-### 4. Authentication (if needed)
+#### 3.1. User Authentication with Neon Auth (if needed)
 
 Skip for CLI tools, scripts, or apps without user accounts.
 
 If the app needs auth: use MCP server `provision_neon_auth` tool, then see `neon-auth.md` for setup. For auth + database queries, see `neon-js.md`.
 
-### 5. ORM Setup (optional)
+#### 3.2. ORM Setup (optional)
 
 Check for existing ORM (Prisma, Drizzle, TypeORM). If none, ask if they want one. For Drizzle integration, see `neon-drizzle.md`.
 
@@ -61,19 +76,11 @@ Check for existing ORM (Prisma, Drizzle, TypeORM). If none, ask if they want one
 - Check for existing migration files or ORM schemas
 - If none: offer to create an example schema or design one together
 
-### 7. Developer Tools
-
-```bash
-npx neon init
-```
-
-Installs the VSCode extension and configures the MCP server. See `devtools.md` for details.
-
 ## What's Next
 
 After setup is complete, offer to help with:
 
-- Neon-specific features (branching, autoscaling, scale-to-zero) — see `features.md`
+- Neon-specific features (branching, autoscaling, scale-to-zero)
 - Connection pooling for production
 - Writing queries or building API endpoints
 - Database migrations and schema changes
