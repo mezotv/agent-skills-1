@@ -80,7 +80,7 @@ Check for existing ORM (Prisma, Drizzle, TypeORM). If none, ask if they want one
 
 After setup is complete, offer to help with:
 
-- Neon-specific features (branching, autoscaling, scale-to-zero) — see `features.md`
+- Neon-specific features (branching, autoscaling, scale-to-zero)
 - Connection pooling for production
 - Writing queries or building API endpoints
 - Database migrations and schema changes

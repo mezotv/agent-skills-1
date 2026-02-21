@@ -106,6 +106,12 @@ Neon Auth is also embedded in the Neon JS SDK - so depending on your use case, y
 
 Use this when the user is planning isolated environments, schema migration testing, preview deployments, or branch lifecycle automation.
 
+Key points:
+
+- Branches are instant, copy-on-write clones (no full data copy).
+- Each branch has its own compute endpoint.
+- Use the neonctl CLI or MCP server to create, inspect, and compare branches.
+
 Link: `references/branching.md`
 
 ## Autoscaling
@@ -118,11 +124,23 @@ Link: https://neon.com/docs/introduction/autoscaling.md
 
 Use this when optimizing idle costs and discussing suspend/resume behavior, including cold-start trade-offs.
 
+Key points:
+
+- Idle computes suspend automatically (default 5 minutes, configurable) (unless disabled - launch & scale plan only)
+- First query after suspend typically has a cold-start penalty (around hundreds of ms)
+- Storage remains active while compute is suspended.
+
 Link: https://neon.com/docs/introduction/scale-to-zero.md
 
 ## Instant Restore
 
 Use this when the user needs point-in-time recovery or wants to restore data state without traditional backup restore workflows.
+
+Key points:
+
+- Restore windows depend on plan limits.
+- Users can create branches from historical points-in-time.
+- Time Travel queries can be used for historical inspection workflows.
 
 Link: https://neon.com/docs/introduction/branch-restore.md
 
@@ -130,11 +148,23 @@ Link: https://neon.com/docs/introduction/branch-restore.md
 
 Use this for read-heavy workloads where the user needs dedicated read-only compute without duplicating storage.
 
+Key points:
+
+- Replicas are read-only compute endpoints sharing the same storage.
+- Creation is fast and scaling is independent from primary compute.
+- Typical use cases: analytics, reporting, and read-heavy APIs.
+
 Link: https://neon.com/docs/introduction/read-replicas.md
 
 ## Connection Pooling
 
 Use this when the user is in serverless or high-concurrency environments and needs safe, scalable Postgres connection management.
+
+Key points:
+
+- Neon pooling uses PgBouncer.
+- Add `-pooler` to endpoint hostnames to use pooled connections.
+- Pooling is especially important in serverless runtimes with bursty concurrency.
 
 Link: https://neon.com/docs/connect/connection-pooling.md
 
@@ -147,5 +177,10 @@ Link: https://neon.com/docs/introduction/ip-allow.md
 ## Logical Replication
 
 Use this when integrating CDC pipelines, external Postgres sync, or replication-based data movement.
+
+Key points:
+
+- Neon supports native logical replication workflows.
+- Useful for replicating to/from external Postgres systems.
 
 Link: https://neon.com/docs/guides/logical-replication-guide.md
