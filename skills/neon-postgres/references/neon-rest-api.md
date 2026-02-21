@@ -2,7 +2,11 @@
 
 Essentials for making direct HTTP requests to the Neon Platform API.
 
-See the [official API reference](https://neon.com/docs/reference/api-reference.md) and [interactive explorer](https://api-docs.neon.tech/reference/getting-started-with-neon-api) for complete details. The full [OpenAPI spec](https://neon.com/api_spec/release/v2.json) is available for programmatic lookup of exact endpoints, request/response schemas, and required fields.
+See the [official API reference](https://neon.com/docs/reference/api-reference.md) for complete details.
+
+## OpenAPI Specification
+
+The full [OpenAPI spec](https://neon.com/api_spec/release/v2.json) is available for programmatic lookup of exact endpoints, request/response schemas, and required fields.
 
 ## Base URL
 

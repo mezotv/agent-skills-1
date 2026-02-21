@@ -11,7 +11,7 @@ Neon is a serverless Postgres platform that separates compute and storage to off
 
 The Neon documentation is the source of truth for all Neon-related information. Always verify claims against the official docs before responding. Neon features and APIs evolve, so prefer fetching current docs over relying on training data.
 
-### Fetching docs as markdown
+### Fetching Docs as Markdown
 
 Any Neon doc page can be fetched as markdown in two ways:
 
@@ -20,7 +20,7 @@ Any Neon doc page can be fetched as markdown in two ways:
 
 Both return the same markdown content. Use whichever method your tools support.
 
-### Finding the right page
+### Finding the Right Page
 
 The docs index lists every available page with its URL and a short description:
 
@@ -30,107 +30,77 @@ https://neon.com/docs/llms.txt
 
 Common doc URLs are organized in the topic links below. If you need a page not listed here, search the [docs index](https://neon.com/docs/llms.txt) — don't guess URLs.
 
+## What Is Neon
+
+Use this for architecture explanations and terminology (organizations, projects, branches, endpoints) before giving implementation advice.
+
+Link: `references/what-is-neon.md`
+
 ## Getting Started
 
 Use this for first-time setup: org/project selection, connection strings, driver installation, optional auth, and initial schema setup.
 
 Link: `references/getting-started.md`
 
-## Connection Methods
+## Connection Methods & Drivers
 
 Use this when you need to pick the correct transport and driver based on runtime constraints (TCP, HTTP, WebSocket, edge, serverless, long-running).
 
 Link: `references/connection-methods.md`
 
-## Developer Tools
-
-Use this for local development enablement with `npx neon init`, VSCode extension setup, and Neon MCP server configuration.
-
-Link: `references/devtools.md`
-
-## Neon CLI
-
-Use this for terminal-first workflows, scripts, and CI/CD automation with `neonctl`.
-
-Link: `references/neon-cli.md`
-
-## Neon REST API
-
-Use this for direct HTTP automation, endpoint-level control, API key auth, rate-limit handling, and operation polling.
-
-Link: `references/neon-rest-api.md`
-
-## Neon TypeScript SDK
-
-Use this when implementing typed programmatic control of Neon resources in TypeScript via `@neondatabase/api-client`.
-
-Link: `references/neon-typescript-sdk.md`
-
-## Neon Python SDK
-
-Use this when implementing programmatic Neon management in Python with the `neon-api` package.
-
-Link: `references/neon-python-sdk.md`
-
-## Interactive API Explorer
-
-Use this when you need to inspect endpoint payloads quickly, prototype requests, or verify exact request/response shapes before coding.
-
-Link: https://api-docs.neon.tech/reference/getting-started-with-neon-api
-
-## OpenAPI Specification
-
-Use this for strict schema lookup, API code generation, or validating endpoint/field names in automation workflows.
-
-Link: https://neon.com/api_spec/release/v2.json
-
-## Serverless Driver
+### Serverless Driver
 
 Use this for `@neondatabase/serverless` patterns, including HTTP queries, WebSocket transactions, and runtime-specific optimizations.
 
 Link: `references/neon-serverless.md`
 
-## Neon Auth
-
-Use this for managed authentication setup, UI components, auth methods, and common integration pitfalls in Next.js and React apps.
-
-Link: `references/neon-auth.md`
-
-## Neon JS SDK
+### Neon JS SDK
 
 Use this for combined Neon Auth + Data API workflows with PostgREST-style querying and typed client setup.
 
 Link: `references/neon-js.md`
 
-## Drizzle ORM
+## Developer Tools
 
-Use this when implementing Drizzle with Neon across serverless, edge, and long-running runtime environments.
+Use this for local development enablement with `npx neonctl@latest init`, VSCode extension setup, and Neon MCP server configuration.
 
-Link: `references/neon-drizzle.md`
+Link: `references/devtools.md`
 
-## Next.js Integration
+### Neon CLI
 
-Use this when the user is building a Next.js app and needs Neon-specific setup patterns for serverless functions, routing, and production deployment.
+Use this for terminal-first workflows, scripts, and CI/CD automation with `neonctl`.
 
-Link: https://neon.com/docs/guides/nextjs.md
+Link: `references/neon-cli.md`
 
-## Django Integration
+## Neon Admin API
 
-Use this when the user is connecting Neon to Django projects, including settings, migrations, and deployment-safe connection patterns.
+The Neon Admin API can be used to manage Neon resources programmatically. It is used behind the scenes by the Neon CLI and MCP server, but can also be used directly for more complex automation workflows or when embedding Neon in other applications.
 
-Link: https://neon.com/docs/guides/django.md
+### Neon REST API
 
-## Prisma Integration
+Use this for direct HTTP automation, endpoint-level control, API key auth, rate-limit handling, and operation polling.
 
-Use this when the user wants Prisma with Neon, including schema/migration workflow and runtime connection setup.
+Link: `references/neon-rest-api.md`
 
-Link: https://neon.com/docs/guides/prisma.md
+### Neon TypeScript SDK
 
-## ORM Selection Guide
+Use this when implementing typed programmatic control of Neon resources in TypeScript via `@neondatabase/api-client`.
 
-Use this when the user is choosing between ORMs and needs compatibility and trade-off guidance for Neon.
+Link: `references/neon-typescript-sdk.md`
 
-Link: https://neon.com/docs/get-started/orms.md
+### Neon Python SDK
+
+Use this when implementing programmatic Neon management in Python with the `neon-api` package.
+
+Link: `references/neon-python-sdk.md`
+
+## Neon Auth
+
+Use this for managed user authentication setup, UI components, auth methods, and Neon Auth integration pitfalls in Next.js and React apps.
+
+Link: `references/neon-auth.md`
+
+Neon Auth is also embedded in the Neon JS SDK - so depending on your use case, you may want to use the Neon JS SDK instead of Neon Auth. See `references/connection-methods.md` for more details.
 
 ## Branching
 
@@ -179,9 +149,3 @@ Link: https://neon.com/docs/introduction/ip-allow.md
 Use this when integrating CDC pipelines, external Postgres sync, or replication-based data movement.
 
 Link: https://neon.com/docs/guides/logical-replication-guide.md
-
-## What Is Neon
-
-Use this for architecture explanations and terminology (organizations, projects, branches, endpoints) before giving implementation advice.
-
-Link: `references/what-is-neon.md`

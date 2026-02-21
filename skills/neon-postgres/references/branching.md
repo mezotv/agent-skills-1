@@ -8,12 +8,6 @@ Start here for branching mechanics, parent-child model, and practical usage patt
 
 Link: https://neon.com/docs/introduction/branching.md
 
-## Platform Features Context
-
-Use this to connect branching with autoscaling, restore, pooling, and related Neon capabilities.
-
-Link: `references/features.md`
-
 ## Branch Operations via REST API
 
 Use this when automating branch creation, listing, or deletion through direct HTTP integration.
