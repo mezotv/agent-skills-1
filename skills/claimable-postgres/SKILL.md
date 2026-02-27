@@ -186,10 +186,10 @@ Always report:
 
 ## Claiming
 
-Claiming is optional. The database works immediately without it. Surface the claim URL to the user and remind them to claim within 72 hours to keep it permanently.
+Claiming is optional. The database works immediately without it. To optionally claim, the user opens the claim URL in a browser, where they sign in or create a Neon account to claim the database.
 
-- **CLI:** `npx get-db@latest claim` or the `PUBLIC_POSTGRES_CLAIM_URL` from `.env`.
-- **API:** The `claim_url` from the create response.
+- **API/SDK:** Give the user the `claim_url` from the create response.
+- **CLI:** `npx get-db@latest claim` reads the claim URL from `.env` and opens the browser automatically.
 
 Users cannot claim into Vercel-linked orgs; they must choose another Neon org.
 
@@ -201,7 +201,7 @@ Users cannot claim into Vercel-linked orgs; they must choose another Neon org.
 | Region | us-east-2 |
 | Postgres | 17 |
 
-Region cannot be changed for claimable databases. Unclaimed databases have stricter quotas. Claiming resets limits to plan defaults.
+Region cannot be changed for claimable databases. Unclaimed databases have stricter quotas. Claiming resets limits to free plan defaults.
 
 | | Unclaimed | Claimed (Free plan) |
 |---|-----------|---------------------|
@@ -220,3 +220,4 @@ If the agent needs a database to fulfill a task (e.g. "build me a todo app with 
 - Ask before running destructive seed SQL (`DROP`, `TRUNCATE`, mass `DELETE`).
 - For production workloads, recommend standard Neon provisioning instead of temporary claimable databases.
 - If users need long-term persistence, instruct them to open the claim URL right away.
+- After writing credentials to an .env file, check that it's covered by .gitignore. If not, warn the user. Do not modify `.gitignore` without confirmation.
