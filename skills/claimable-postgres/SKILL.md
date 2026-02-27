@@ -16,23 +16,15 @@ Instant Postgres databases for local development, demos, prototyping, and test e
 
 ## Quick Start
 
-**API** (structured JSON response, no runtime dependency):
-
 ```bash
 curl -s -X POST "https://pg.new/api/v1/database" \
   -H "Content-Type: application/json" \
-  -d '{"ref": "agent-skills"}' | jq .
+  -d '{"ref": "agent-skills"}'
 ```
 
 Parse `connection_string` and `claim_url` from the JSON response. Write `connection_string` to the project's `.env` as `DATABASE_URL`.
 
-**CLI** (provisions and writes `.env` in one step):
-
-```bash
-npx get-db@latest --yes
-```
-
-Always use `--yes` to skip interactive prompts (agents cannot respond to them).
+For other methods (CLI, SDK, Vite plugin), see [Which Method?](#which-method) below.
 
 ## Which Method?
 
