@@ -86,6 +86,12 @@ Returns the same response shape. Status transitions: `UNCLAIMED` -> `CLAIMING` -
 
 ## CLI
 
+```bash
+npx get-db@latest --yes
+```
+
+Provisions a database and writes the connection string to `.env` in one step. Always use `@latest` and `--yes` (skips interactive prompts that would stall the agent).
+
 ### Pre-run Check
 
 Check if `DATABASE_URL` (or the chosen key) already exists in the target `.env`. The CLI exits without provisioning if it finds the key.
