@@ -6,7 +6,7 @@ description: >-
   SDK. Use when users ask for a quick Postgres environment, a throwaway
   DATABASE_URL for prototyping/tests, or "just give me a DB now". Triggers
   include: "quick postgres", "temporary postgres", "no signup database",
-  "no credit card database", "instant DATABASE_URL", "npx get-db", "neon.new",
+  "no credit card database", "instant DATABASE_URL", "npx neon-new", "neon.new",
   "neon.new API", "claimable postgres API".
 ---
 
@@ -29,9 +29,9 @@ For other methods (CLI, SDK, Vite plugin), see [Which Method?](#which-method) be
 ## Which Method?
 
 - **REST API**: Returns structured JSON. No runtime dependency beyond `curl`. Preferred when the agent needs predictable output and error handling.
-- **CLI** (`npx get-db@latest --yes`): Provisions and writes `.env` in one command. Convenient when Node.js is available and the user wants a simple setup.
-- **SDK** (`get-db/sdk`): Scripts or programmatic provisioning in Node.js.
-- **Vite plugin** (`vite-plugin-db`): Auto-provisions on `vite dev` if `DATABASE_URL` is missing. Use when the user has a Vite project.
+- **CLI** (`npx neon-new@latest --yes`): Provisions and writes `.env` in one command. Convenient when Node.js is available and the user wants a simple setup.
+- **SDK** (`neon-new/sdk`): Scripts or programmatic provisioning in Node.js.
+- **Vite plugin** (`vite-plugin-neon-new`): Auto-provisions on `vite dev` if `DATABASE_URL` is missing. Use when the user has a Vite project.
 - **Browser**: User cannot run CLI or API. Direct to https://neon.new.
 
 ## REST API
@@ -87,7 +87,7 @@ Returns the same response shape. Status transitions: `UNCLAIMED` -> `CLAIMING` -
 ## CLI
 
 ```bash
-npx get-db@latest --yes
+npx neon-new@latest --yes
 ```
 
 Provisions a database and writes the connection string to `.env` in one step. Always use `@latest` and `--yes` (skips interactive prompts that would stall the agent).
@@ -116,7 +116,7 @@ Get confirmation before proceeding.
 | `--logical-replication` | `-L` | Enable logical replication | `false` |
 | `--ref` | `-r` | Referrer id (use `agent-skills` when provisioning through this skill) | none |
 
-Alternative package managers: `yarn dlx get-db@latest`, `pnpm dlx get-db@latest`, `bunx get-db@latest`, `deno run -A get-db@latest`.
+Alternative package managers: `yarn dlx neon-new@latest`, `pnpm dlx neon-new@latest`, `bunx neon-new@latest`, `deno run -A neon-new@latest`.
 
 ### Output
 
@@ -133,7 +133,7 @@ PUBLIC_POSTGRES_CLAIM_URL=https://neon.new/claim/...
 Use for scripts and programmatic provisioning flows.
 
 ```typescript
-import { instantPostgres } from 'get-db';
+import { instantPostgres } from 'neon-new';
 
 const { databaseUrl, databaseUrlDirect, claimUrl, claimExpiresAt } = await instantPostgres({
   referrer: 'agent-skills',
@@ -145,7 +145,7 @@ Returns `databaseUrl` (pooled), `databaseUrlDirect` (direct, for migrations), `c
 
 ## Vite Plugin
 
-For Vite projects, `vite-plugin-db` auto-provisions a database on `vite dev` if `DATABASE_URL` is missing. Install with `npm install -D vite-plugin-db`. See the [Claimable Postgres docs](https://neon.com/docs/reference/claimable-postgres#vite-plugin) for configuration.
+For Vite projects, `vite-plugin-neon-new` auto-provisions a database on `vite dev` if `DATABASE_URL` is missing. Install with `npm install -D vite-plugin-neon-new`. See the [Claimable Postgres docs](https://neon.com/docs/reference/claimable-postgres#vite-plugin) for configuration.
 
 ## Agent Workflow
 
@@ -169,7 +169,7 @@ For Vite projects, `vite-plugin-db` auto-provisions a database on `vite dev` if 
 3. **Gather options:** Use defaults unless context suggests otherwise (e.g., user mentions a custom env file, seed SQL, or logical replication).
 4. **Run:** Execute with `@latest --yes` plus the confirmed options. Always use `@latest` to avoid stale cached versions. `--yes` skips interactive prompts that would stall the agent.
    ```bash
-   npx get-db@latest --yes --ref agent-skills --env .env.local --seed ./schema.sql
+   npx neon-new@latest --yes --ref agent-skills --env .env.local --seed ./schema.sql
    ```
 5. **Verify:** Confirm the connection string was written to the intended file.
 6. **Report:** Tell the user where the connection string was written, which key was used, and that a claim URL is in the env file. Remind them: the database works now; claim within 72 hours to keep it permanently.
@@ -189,7 +189,7 @@ Always report:
 Claiming is optional. The database works immediately without it. To optionally claim, the user opens the claim URL in a browser, where they sign in or create a Neon account to claim the database.
 
 - **API/SDK:** Give the user the `claim_url` from the create response.
-- **CLI:** `npx get-db@latest claim` reads the claim URL from `.env` and opens the browser automatically.
+- **CLI:** `npx neon-new@latest claim` reads the claim URL from `.env` and opens the browser automatically.
 
 Users cannot claim into Vercel-linked orgs; they must choose another Neon org.
 
