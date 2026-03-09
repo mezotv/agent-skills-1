@@ -2,12 +2,12 @@
 name: claimable-postgres
 description: >-
   Provision instant temporary Postgres databases via Claimable Postgres by Neon
-  (pg.new) with no login, signup, or credit card. Supports REST API, CLI, and
+  (neon.new) with no login, signup, or credit card. Supports REST API, CLI, and
   SDK. Use when users ask for a quick Postgres environment, a throwaway
   DATABASE_URL for prototyping/tests, or "just give me a DB now". Triggers
   include: "quick postgres", "temporary postgres", "no signup database",
-  "no credit card database", "instant DATABASE_URL", "npx get-db", "pg.new",
-  "pg.new API", "claimable postgres API".
+  "no credit card database", "instant DATABASE_URL", "npx get-db", "neon.new",
+  "neon.new API", "claimable postgres API".
 ---
 
 # Claimable Postgres
@@ -17,7 +17,7 @@ Instant Postgres databases for local development, demos, prototyping, and test e
 ## Quick Start
 
 ```bash
-curl -s -X POST "https://pg.new/api/v1/database" \
+curl -s -X POST "https://neon.new/api/v1/database" \
   -H "Content-Type: application/json" \
   -d '{"ref": "agent-skills"}'
 ```
@@ -32,16 +32,16 @@ For other methods (CLI, SDK, Vite plugin), see [Which Method?](#which-method) be
 - **CLI** (`npx get-db@latest --yes`): Provisions and writes `.env` in one command. Convenient when Node.js is available and the user wants a simple setup.
 - **SDK** (`get-db/sdk`): Scripts or programmatic provisioning in Node.js.
 - **Vite plugin** (`vite-plugin-db`): Auto-provisions on `vite dev` if `DATABASE_URL` is missing. Use when the user has a Vite project.
-- **Browser**: User cannot run CLI or API. Direct to https://pg.new.
+- **Browser**: User cannot run CLI or API. Direct to https://neon.new.
 
 ## REST API
 
-**Base URL:** `https://pg.new/api/v1`
+**Base URL:** `https://neon.new/api/v1`
 
 ### Create a database
 
 ```bash
-curl -s -X POST "https://pg.new/api/v1/database" \
+curl -s -X POST "https://neon.new/api/v1/database" \
   -H "Content-Type: application/json" \
   -d '{"ref": "agent-skills"}'
 ```
@@ -61,7 +61,7 @@ The `connection_string` returned by the API is a pooled connection URL. For a di
   "status": "UNCLAIMED",
   "neon_project_id": "gentle-scene-06438508",
   "connection_string": "postgresql://...",
-  "claim_url": "https://pg.new/claim/019beb39-...",
+  "claim_url": "https://neon.new/claim/019beb39-...",
   "expires_at": "2026-01-26T14:19:14.580Z",
   "created_at": "2026-01-23T14:19:14.580Z",
   "updated_at": "2026-01-23T14:19:14.580Z"
@@ -71,7 +71,7 @@ The `connection_string` returned by the API is a pooled connection URL. For a di
 ### Check status
 
 ```bash
-curl -s "https://pg.new/api/v1/database/{id}"
+curl -s "https://neon.new/api/v1/database/{id}"
 ```
 
 Returns the same response shape. Status transitions: `UNCLAIMED` -> `CLAIMING` -> `CLAIMED`. After the database is claimed, `connection_string` returns `null`.
@@ -125,7 +125,7 @@ The CLI writes to the target `.env`:
 ```
 DATABASE_URL=postgresql://...              # pooled (use for application queries)
 DATABASE_URL_DIRECT=postgresql://...       # direct (use for migrations, e.g. Prisma)
-PUBLIC_POSTGRES_CLAIM_URL=https://pg.new/claim/...
+PUBLIC_POSTGRES_CLAIM_URL=https://neon.new/claim/...
 ```
 
 ## SDK
@@ -152,7 +152,7 @@ For Vite projects, `vite-plugin-db` auto-provisions a database on `vite dev` if 
 ### API path
 
 1. **Confirm intent:** If the request is ambiguous, confirm the user wants a temporary, no-signup database. Skip this if they explicitly asked for a quick or temporary database.
-2. **Provision:** POST to `https://pg.new/api/v1/database` with `{"ref": "agent-skills"}`.
+2. **Provision:** POST to `https://neon.new/api/v1/database` with `{"ref": "agent-skills"}`.
 3. **Parse response:** Extract `connection_string`, `claim_url`, and `expires_at` from the JSON response.
 4. **Write .env:** Write `DATABASE_URL=<connection_string>` to the project's `.env` (or the user's preferred file and key). Do not overwrite an existing key without confirmation.
 5. **Seed (if needed):** If the user has a seed SQL file, run it against the new database:
