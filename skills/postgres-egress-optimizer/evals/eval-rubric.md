@@ -55,7 +55,7 @@ This file defines the scoring criteria for evaluating the postgres-egress-optimi
 
 ## Mock pg_stat_statements
 
-The mock stats file (`fixture/hono-drizzle-app/mock-stats/pg_stat_statements.md`) should show:
+The mock stats file (`fixtures/hono-drizzle-app/mock-stats/pg_stat_statements.md`) should show:
 
 | Query pattern                     | calls  | total_rows | avg_rows_per_call | Notes                                 |
 | --------------------------------- | ------ | ---------- | ----------------- | ------------------------------------- |
