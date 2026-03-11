@@ -22,21 +22,20 @@ The SKILL.md bakes in all diagnostic queries, fix patterns, and workflow steps. 
 
 ```
 skills/postgres-egress-optimizer/
-├── SKILL.md                          # Core workflow (~300-400 lines)
+├── SKILL.md                          # Core workflow
 ├── references/
 │   └── advanced.md                   # pg_dump, logical replication, PrivateLink
 └── evals/
-    ├── README.md                     # Runbook: how to run evals, scoring, prompts
+    ├── README.md                     # Runbook: how to run evals, prompts, process
     ├── results.csv                   # Append-only eval results
-    ├── ground-truth.md               # Known problems + expected fixes
-    ├── judge-instructions.md         # Scoring guide for human or LLM judge
+    ├── eval-rubric.md                # Problem definitions + scoring criteria
     └── fixture/
-        └── tanstack-drizzle-app/
+        └── hono-drizzle-app/
             ├── src/
             ├── drizzle/
             ├── tests/
             └── mock-stats/
-                └── pg_stat_statements.md   # Simulated diagnostic output matching the app's bad patterns
+                └── pg_stat_statements.md
 ```
 
 ### SKILL.md Content Outline
@@ -54,8 +53,9 @@ skills/postgres-egress-optimizer/
    - `SELECT *` → explicit column lists (exclude unused columns, especially large ones)
    - Missing pagination → add LIMIT/OFFSET or cursor-based pagination
    - Repeated identical queries → caching layer or query deduplication
-   - Client-side aggregation → server-side SQL aggregations (SUM, COUNT, GROUP BY)
+   - Application-side aggregation → server-side SQL aggregations (SUM, COUNT, GROUP BY)
    - ORM overfetching → Drizzle column selection / `.select()` with explicit fields
+   - Join duplication → separate queries or subqueries that don't repeat wide columns
    - Each pattern includes before/after examples in plain SQL and Drizzle
 
 4. **Verify** — Run existing tests (if any) to confirm nothing broke. Reset `pg_stat_statements`, wait for measurement window, re-run diagnostics, compare.
@@ -72,26 +72,39 @@ The description needs to be broad enough to catch indirect phrasings. Users won'
 
 ### Design Principles
 
-- **Binary scoring.** Per problem: detected (yes/no), fixed (yes/no). No subjective quality scales.
-- **Execution mode, not plan mode.** The agent applies actual code changes. We evaluate the diff. Either the fix is correct or it isn't.
-- **Ground truth written before first run.** Known problems and expected fixes documented upfront so scoring is objective.
-- **No contamination.** Fixture is copied to a temp directory for each run. The agent never sees ground truth, results, or judge instructions.
+- **Binary scoring.** Per problem: detected (yes/no), fixed (yes/no). Scored against a rubric with yes/no questions.
+- **Execution mode, not plan mode.** The agent applies actual code changes. We evaluate the diff.
+- **Rubric written before first run.** Problem definitions and scoring criteria documented upfront so scoring is objective.
+- **No contamination.** Fixture is copied to a temp directory for each run. The agent never sees the rubric or results.
 
-### Fixture: TanStack Start + Drizzle App
+### Eval Rubric
 
-A minimal app (~10-15 files) with 5 intentional egress anti-patterns embedded in route handlers. Uses Neon Testing for functional integration tests that verify the app works correctly (not egress-related assertions — business logic regression).
+`evals/eval-rubric.md` defines 5 problems and provides yes/no scoring questions for each. This single file is used by both human judges and LLM judges.
 
-**Why TanStack Start?** Neon sponsors TanStack Start. It's a realistic, modern choice for the target audience.
-
-**Intentional problems (to be finalized during implementation):**
+**Intentional problems:**
 
 1. `SELECT *` on a table with a large JSONB column, app only uses 3 fields
 2. Unpaginated list endpoint returning full table
-3. High-frequency query called on every page render, no caching
-4. Client-side filtering/aggregation of data that should be a SQL GROUP BY
-5. Fetching related data with a join that multiplies rows unnecessarily
+3. High-frequency repeated query only visible via pg_stat_statements (code looks fine)
+4. Application-side aggregation that should be a SQL GROUP BY
+5. JOIN that duplicates wide product data across every review row
 
-Each problem maps to a detection + fix check in ground truth.
+For each problem, two questions:
+
+- **Detected?** Did the agent identify this specific problem?
+- **Fixed?** Does the diff resolve it correctly?
+
+Plus one overall question:
+
+- **Tests pass?** Do the integration tests still pass after changes?
+
+### Fixture: Hono + Drizzle + Bun
+
+A minimal API app with 5 intentional egress anti-patterns embedded in route handlers. Uses Neon Testing for functional integration tests that verify the app works correctly (not egress-related assertions — business logic regression).
+
+**Why Hono + Bun?** Minimal framework boilerplate — route handlers are almost pure query logic. Bun runs TypeScript natively with no build step, has a built-in test runner. The agent spends its time on query patterns, not framework conventions.
+
+Each problem maps to a detection + fix check in the eval rubric (`evals/eval-rubric.md`).
 
 ### Prompts
 
@@ -113,6 +126,26 @@ date,skill_commit,fixture,prompt,model,p1_detected,p1_fixed,p2_detected,p2_fixed
 
 One row per eval run. Append-only. Commit hash ties results to a specific version of the skill + fixture.
 
+### Eval Workflow (documented in `evals/README.md`)
+
+```bash
+# 1. Copy fixture to clean workspace (exclude any .git artifacts)
+mkdir /tmp/eval-$(date +%Y%m%d)
+cp -r evals/fixture/hono-drizzle-app/* /tmp/eval-$(date +%Y%m%d)/
+cd /tmp/eval-$(date +%Y%m%d)
+git init && git add . && git commit -m "baseline"
+
+# 2. Run Claude Code with skill installed + one prompt
+# (skill installed via .claude/skills/ or project config)
+# Use prompt P1, P2, or P3
+
+# 3. Capture diff
+git diff > /path/to/diff-output.md
+
+# 4. Score against eval-rubric.md (human or LLM judge)
+# Record results in results.csv
+```
+
 ### Judge
 
 **v1: Claude Code as judge, human-verified initially.**
@@ -121,34 +154,11 @@ Workflow:
 
 1. Copy fixture to temp directory
 2. Run Claude Code with skill installed + one prompt → produces a git diff
-3. Feed diff + ground truth + original fixture to a second Claude Code instance with `judge-instructions.md`
-4. Judge outputs detected/fixed per problem + test pass status
+3. Feed diff + original fixture code + `eval-rubric.md` to a second Claude Code instance
+4. Judge answers each yes/no question per problem and outputs a row for `results.csv`
 5. Append row to `results.csv`
 
-First few runs: User verifies the judge's scoring manually. Once scoring is trustworthy, human spot-checks only.
-
-`judge-instructions.md` contains per-problem criteria. Example: "Problem 1: The `/api/products` route fetches all columns including `raw_payload` (JSONB, ~50KB). **Detected** = agent output identifies this route or column as a problem. **Fixed** = diff shows the query now selects only needed columns and excludes `raw_payload`."
-
-### Eval Workflow (documented in `evals/README.md`)
-
-```bash
-# 1. Copy fixture to clean workspace (exclude any .git artifacts)
-mkdir /tmp/eval-$(date +%Y%m%d)
-cp -r evals/fixture/tanstack-drizzle-app/* /tmp/eval-$(date +%Y%m%d)/
-cd /tmp/eval-$(date +%Y%m%d)
-git init && git add . && git commit -m "baseline"
-
-# 2. Run Claude Code with skill + prompt
-# (skill installed via .claude/skills/ or project config)
-# Use prompt P1, P2, or P3
-
-# 3. Capture diff
-git diff > /path/to/diff-output.md
-
-# 4. Score (Claude Code judge or manual)
-# Feed diff + ground-truth.md + fixture code to judge
-# Record results in results.csv
-```
+First few runs: human verifies the judge's scoring. Once trustworthy, human spot-checks only.
 
 ---
 
@@ -156,21 +166,21 @@ git diff > /path/to/diff-output.md
 
 ### Included in v1
 
-| Dimension             | Choice                                                  |
-| --------------------- | ------------------------------------------------------- |
-| Fixture               | 1 × TanStack Start + Drizzle app with integration tests |
-| Prompts               | 3 × varying specificity                                 |
-| Scoring               | Binary (detected/fixed per problem)                     |
-| Judge                 | Claude Code with human verification                     |
-| Model                 | Opus 4.6/Claude Code (recorded per run)                 |
-| ORM coverage in skill | Plain SQL + Drizzle examples in fix patterns            |
+| Dimension             | Choice                                              |
+| --------------------- | --------------------------------------------------- |
+| Fixture               | 1 × Hono + Drizzle + Bun app with integration tests |
+| Prompts               | 3 × varying specificity                             |
+| Scoring               | Binary yes/no per problem (detected/fixed)          |
+| Judge                 | Claude Code with human verification                 |
+| Model                 | Opus 4.6/Claude Code                                |
+| ORM coverage in skill | Plain SQL + Drizzle examples in fix patterns        |
 
 ### Excluded (with reasoning)
 
 | Exclusion                                             | Reasoning                                                                                                                                                                                                                                                               |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Additional ORMs (Prisma, SQLAlchemy, TypeORM)         | Skill shows plain SQL + Drizzle. Pattern is clear for adding more.                                                                                                                                                                                                      |
-| Additional fixtures (Next.js, Express, FastAPI, etc.) | One fixture tests the full loop. More can be added using the same ground-truth structure.                                                                                                                                                                               |
+| Additional fixtures (Next.js, Express, FastAPI, etc.) | One fixture tests the full loop. More can be added using the same eval-rubric structure.                                                                                                                                                                                |
 | No-test-coverage fixture variant                      | v1 fixture includes tests, which gives the agent a verification mechanism. A future fixture without tests would evaluate the harder scenario.                                                                                                                           |
 | Raw SQL / diagnostic-only fixture                     | Without application code, the agent can flag bad queries but can't determine which columns are actually needed or apply fixes.                                                                                                                                          |
 | MCP server integration                                | Expands testing surface significantly. Skill works standalone. MCP support can be added later without changing the core workflow.                                                                                                                                       |
@@ -189,3 +199,4 @@ git diff > /path/to/diff-output.md
 - [pg_stat_statements](https://neon.com/docs/extensions/pg_stat_statements) — The core diagnostic extension the skill relies on
 - [Cost optimization](https://neon.com/docs/introduction/cost-optimization) — Broader cost guide that `advanced.md` should reference
 - [Elephantshark](https://neon.com/blog/elephantshark-monitor-postgres-network-traffic) — Open-source Postgres traffic monitor, relevant to the "deterministic egress measurement" exclusion
+- [Agent Skills specification](https://agentskills.io/specification) — SKILL.md format spec (naming, frontmatter, 500-line limit)
