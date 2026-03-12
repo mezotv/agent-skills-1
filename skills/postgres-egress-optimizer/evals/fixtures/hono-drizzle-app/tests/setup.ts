@@ -49,9 +49,32 @@ export async function seed() {
     { name: "Clothing", slug: "clothing" },
   ]);
 
-  // Products (with large description and rawPayload to simulate real data)
-  const description = "A ".repeat(2500); // ~5KB
-  const rawPayload = { data: "x".repeat(50000) }; // ~50KB
+  const description = `The latest model featuring a high-resolution display, long-lasting battery life, and premium build quality. Designed for professionals and enthusiasts alike, this product delivers exceptional performance across a wide range of tasks. The ergonomic design ensures comfort during extended use, while the advanced thermal management system keeps everything running smoothly. Package includes the main unit, charging cable, quick start guide, and a protective carrying case. Backed by a 2-year manufacturer warranty with worldwide coverage. For detailed specifications, compatibility information, and support resources, visit our product page.`;
+  const rawPayload = {
+    supplier: "TechDistributors Inc.",
+    sku: "TD-2024-PRO-001",
+    importedAt: "2025-11-14T08:30:00Z",
+    source: "bulk-import-v3",
+    originalListing: {
+      title: "Professional Grade Equipment",
+      htmlDescription:
+        "<div class='product-detail'>" +
+        "<p>Premium quality materials and construction. ".repeat(200) +
+        "</p></div>",
+      specifications: Object.fromEntries(
+        Array.from({ length: 50 }, (_, i) => [
+          `spec_${i}`,
+          `value_${i}_${"detail".repeat(20)}`,
+        ]),
+      ),
+      shippingMatrix: Array.from({ length: 100 }, (_, i) => ({
+        region: `region_${i}`,
+        carrier: `carrier_${i % 5}`,
+        rate: (Math.random() * 50).toFixed(2),
+        estimatedDays: Math.floor(Math.random() * 14) + 1,
+      })),
+    },
+  };
 
   await db.insert(products).values([
     {
@@ -96,7 +119,7 @@ export async function seed() {
     },
   ]);
 
-  // Reviews — multiple for product 1 to test P5 (JOIN duplication)
+  // Seed reviews
   await db.insert(reviews).values([
     { productId: 1, userName: "alice", rating: 5, body: "Great laptop!" },
     { productId: 1, userName: "bob", rating: 4, body: "Good value." },

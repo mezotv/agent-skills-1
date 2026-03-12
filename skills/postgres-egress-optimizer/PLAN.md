@@ -29,13 +29,15 @@ skills/postgres-egress-optimizer/
     ├── README.md                     # Runbook: how to run evals, prompts, process
     ├── results.csv                   # Append-only eval results
     ├── eval-rubric.md                # Problem definitions + scoring criteria
+    ├── diffs/
+    │   └── 2026-03-12_A_baseline.diff
+    ├── mock-stats/
+    │   └── pg_stat_statements.md     # Used by Prompt C only, never copied to fixture
     └── fixture/
         └── hono-drizzle-app/
             ├── src/
             ├── drizzle/
-            ├── tests/
-            └── mock-stats/
-                └── pg_stat_statements.md
+            └── tests/
 ```
 
 ### SKILL.md Content Outline
@@ -110,11 +112,11 @@ Each problem maps to a detection + fix check in the eval rubric (`evals/eval-rub
 
 Three prompts of varying specificity, stored in `evals/README.md`:
 
-| ID  | Type     | Example                                                                                                                                   |
-| --- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| P1  | Vague    | "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."                                            |
-| P2  | Moderate | "Optimize the database egress in this project."                                                                                           |
-| P3  | Specific | "Here are my pg_stat_statements results [contents of mock-stats/pg_stat_statements.md]. Analyze my codebase and fix the worst offenders." |
+| ID  | Type     | Example                                                                                                                                                |
+| --- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A   | Vague    | "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."                                                         |
+| B   | Moderate | "Optimize the database egress in this project."                                                                                                        |
+| C   | Specific | "Here are my pg_stat_statements results: [paste contents of evals/mock-stats/pg_stat_statements.md]. Analyze my codebase and fix the worst offenders." |
 
 ### Scoring
 
@@ -137,7 +139,9 @@ git init && git add . && git commit -m "baseline"
 
 # 2. Run Claude Code with skill installed + one prompt
 # (skill installed via .claude/skills/ or project config)
-# Use prompt P1, P2, or P3
+# Use prompt A or B from the table above
+# If using Prompt C, paste the contents of evals/mock-stats/pg_stat_statements.md
+# into the prompt. Do NOT copy the file into the workspace.
 
 # 3. Capture diff
 git diff > /path/to/diff-output.md
