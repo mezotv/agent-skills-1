@@ -1,4 +1,4 @@
-# postgres-egress-optimizer — Project Plan
+# postgres-egress-optimizer — project plan
 
 ## Problem
 
@@ -10,9 +10,9 @@ An agent skill that guides Claude Code (or any SKILL.md-compatible agent) throug
 
 ---
 
-## Skill Design
+## Skill design
 
-### Architecture: Self-contained
+### Architecture: self-contained
 
 The SKILL.md bakes in all diagnostic queries, fix patterns, and workflow steps. Fully self-contained — no external doc fetches required at runtime.
 
@@ -40,7 +40,7 @@ skills/postgres-egress-optimizer/
             └── tests/
 ```
 
-### SKILL.md Content Outline
+### SKILL.md content outline
 
 **Frontmatter:** Name, description (optimized for triggering — covers "high bill", "egress", "network transfer", "data transfer costs", "SELECT \*", "query optimization for cost", etc.)
 
@@ -51,7 +51,6 @@ skills/postgres-egress-optimizer/
 2. **Analyze codebase** — Cross-reference top offending queries with application code. Identify which columns are actually used downstream. Flag gaps between what's fetched and what's consumed.
 
 3. **Fix** — Apply specific patterns per problem found:
-
    - `SELECT *` → explicit column lists (exclude unused columns, especially large ones)
    - Missing pagination → add LIMIT/OFFSET or cursor-based pagination
    - Repeated identical queries → caching layer or query deduplication
@@ -64,22 +63,22 @@ skills/postgres-egress-optimizer/
 
 **References → `advanced.md`:** Covers scenarios that aren't query optimization — Consumption API monitoring (hourly/daily/monthly egress breakdowns per project), reducing `pg_dump` frequency, tuning logical replication (row filters, column lists on `CREATE PUBLICATION`), PrivateLink for AWS.
 
-### Description / Triggering
+### Description / triggering
 
 The description needs to be broad enough to catch indirect phrasings. Users won't say "optimize my egress" — they'll say "why is my Neon bill so high" or "my database costs jumped" or "I'm transferring too much data." The description should explicitly list these trigger phrases.
 
 ---
 
-## Eval System
+## Eval system
 
-### Design Principles
+### Design principles
 
 - **Binary scoring.** Per problem: detected (yes/no), fixed (yes/no). Scored against a rubric with yes/no questions.
 - **Execution mode, not plan mode.** The agent applies actual code changes. We evaluate the diff.
 - **Rubric written before first run.** Problem definitions and scoring criteria documented upfront so scoring is objective.
 - **No contamination.** Fixture is copied to a temp directory for each run. The agent never sees the rubric or results.
 
-### Eval Rubric
+### Eval rubric
 
 `evals/eval-rubric.md` defines 5 problems and provides yes/no scoring questions for each. This single file is used by both human judges and LLM judges.
 
@@ -128,7 +127,7 @@ date,skill_commit,fixture,prompt,model,p1_detected,p1_fixed,p2_detected,p2_fixed
 
 One row per eval run. Append-only. Commit hash ties results to a specific version of the skill + fixture.
 
-### Eval Workflow (documented in `evals/README.md`)
+### Eval workflow (documented in `evals/README.md`)
 
 ```bash
 # 1. Copy fixture to clean workspace (exclude any .git artifacts)
@@ -166,7 +165,7 @@ First few runs: human verifies the judge's scoring. Once trustworthy, human spot
 
 ---
 
-## Dimensions & Exclusions
+## Dimensions & exclusions
 
 ### Included in v1
 
@@ -204,3 +203,4 @@ First few runs: human verifies the judge's scoring. Once trustworthy, human spot
 - [Cost optimization](https://neon.com/docs/introduction/cost-optimization) — Broader cost guide that `advanced.md` should reference
 - [Elephantshark](https://neon.com/blog/elephantshark-monitor-postgres-network-traffic) — Open-source Postgres traffic monitor, relevant to the "deterministic egress measurement" exclusion
 - [Agent Skills specification](https://agentskills.io/specification) — SKILL.md format spec (naming, frontmatter, 500-line limit)
+- [Extend Claude with skills](https://code.claude.com/docs/en/skills) — Create, manage, and share skills to extend Claude’s capabilities in Claude Code. Includes custom commands and bundled skills.

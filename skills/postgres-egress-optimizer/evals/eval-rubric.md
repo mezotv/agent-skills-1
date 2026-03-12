@@ -1,4 +1,4 @@
-# Eval Rubric: Hono + Drizzle Fixture
+# Eval rubric: Hono + Drizzle fixture
 
 This file defines the scoring criteria for evaluating the postgres-egress-optimizer skill. Used by both human judges and LLM judges.
 
@@ -10,12 +10,12 @@ This file defines the scoring criteria for evaluating the postgres-egress-optimi
 
 ---
 
-## Problems & Scoring
+## Problems & scoring
 
-### P1: SELECT * with unused large columns
+### P1: SELECT \* with unused large columns
 
 - **Route:** `GET /products`
-- **Bad pattern:** Drizzle query uses `select()` with no column specification (equivalent to SELECT *). The response only returns `{ id, name, price, imageUrls }`. The `raw_payload` (~50KB) and `description` (~5KB) columns are fetched from the database but never used.
+- **Bad pattern:** Drizzle query uses `select()` with no column specification (equivalent to SELECT \*). The response only returns `{ id, name, price, imageUrls }`. The `raw_payload` (~50KB) and `description` (~5KB) columns are fetched from the database but never used.
 - **Detected?** Does the agent identify that this route fetches columns (specifically `raw_payload` and/or `description`) that the response doesn't use?
 - **Fixed?** Does the diff change the Drizzle query to select only the columns needed by the response (id, name, price, image_urls)?
 
@@ -44,7 +44,7 @@ This file defines the scoring criteria for evaluating the postgres-egress-optimi
 
 - **Route:** `GET /products/:id`
 - **Bad pattern:** Fetches a product with all its reviews via a JOIN. Each review row duplicates every product column. A product with 200 reviews sends `raw_payload` (50KB) 200 times — ~10MB for a single request.
-- **Detected?** Does the agent identify that the join duplicates wide product data across every review row?
+- **Detected?** Does the agent identify that the join duplicates wide product data across every review row? Note: narrowing column selection on the join (excluding rawPayload) is a P1-style fix, not P5 detection. P5 requires recognizing the structural duplication caused by the join itself.
 - **Fixed?** Does the diff eliminate the duplication of product data across review rows?
 
 ### Overall
@@ -59,7 +59,7 @@ The mock stats file (`fixtures/hono-drizzle-app/mock-stats/pg_stat_statements.md
 
 | Query pattern                     | calls  | total_rows | avg_rows_per_call | Notes                                 |
 | --------------------------------- | ------ | ---------- | ----------------- | ------------------------------------- |
-| SELECT * FROM products (P1/P2)    | 500    | 500,000    | 1,000             | High rows, wide rows                  |
-| SELECT * FROM categories (P3)     | 50,000 | 500,000    | 10                | Extreme call frequency                |
-| SELECT * FROM reviews (P4)        | 200    | 1,000,000  | 5,000             | Massive row transfer for small output |
+| SELECT \* FROM products (P1/P2)   | 500    | 500,000    | 1,000             | High rows, wide rows                  |
+| SELECT \* FROM categories (P3)    | 50,000 | 500,000    | 10                | Extreme call frequency                |
+| SELECT \* FROM reviews (P4)       | 200    | 1,000,000  | 5,000             | Massive row transfer for small output |
 | SELECT products JOIN reviews (P5) | 300    | 60,000     | 200               | Row duplication from join             |

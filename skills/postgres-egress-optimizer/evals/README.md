@@ -1,4 +1,4 @@
-# Evals
+# Evals runbook
 
 How to run and score evaluations for the postgres-egress-optimizer skill.
 
@@ -14,29 +14,31 @@ Prompt C (specific, with pg_stat_statements data) is planned but deferred until 
 ## Running an eval
 
 ```bash
-# 0. Store the evals directory path
-EVALS_DIR=$(pwd)/evals
+# 0. Set up paths
+SKILL_DIR=$(pwd)
+SUFFIX=$(date +%Y%m%d)
+DIFF=evals/diffs/${SUFFIX}_A_baseline.diff
 
 # 1. Copy fixture to a clean workspace
-mkdir /tmp/eval-$(date +%Y%m%d)
-cp -r evals/fixtures/hono-drizzle-app/. /tmp/eval-$(date +%Y%m%d)/
-cd /tmp/eval-$(date +%Y%m%d)
+rm -fR /tmp/eval-$SUFFIX
+mkdir /tmp/eval-$SUFFIX
+cp -r evals/fixtures/hono-drizzle-app/. /tmp/eval-$SUFFIX/
+cd /tmp/eval-$SUFFIX
 git init && git add . && git commit -m "baseline"
 
-# 2. Run Claude Code with one prompt
-# Prompt A:
-claude "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."
-# Prompt B:
-claude "Optimize the database egress in this project."
+# 2. Run Claude Code with one prompt (pick one)
+claude --model claude-sonnet-4-6 "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."
+# claude "Optimize the database egress in this project."
 
 # 3. Run integration tests
 bun test
 
 # 4. Capture the diff
-git diff > $EVALS_DIR/diffs/$(date +%Y-%m-%d)_A_baseline.diff
+git diff > $SKILL_DIR/$DIFF
 
-# 5. Score against eval-rubric.md
-# See "Scoring" below
+# 5. Score: return to skill dir and run scoring command
+cd $SKILL_DIR
+claude --model claude-sonnet-4-6 "/score-eval $DIFF"
 ```
 
 ## Scoring

@@ -1,2 +1,4 @@
 date,skill_commit,fixture,prompt,model,p1_detected,p1_fixed,p2_detected,p2_fixed,p3_detected,p3_fixed,p4_detected,p4_fixed,p5_detected,p5_fixed,tests_pass,notes
 2026-03-11,4c7ed96,hono-drizzle-app,A,opus-4.6-high-effort,yes,yes,no,no,no,no,yes,yes,no,no,yes,baseline - no skill
+2026-03-12,7c0cf62,hono-drizzle-app,B,opus-4.6-high-effort,yes,yes,no,no,no,no,yes,yes,yes,yes,yes,baseline - no skill
+2026-03-12,1965663,hono-drizzle-app,B2,opus-4.6-high-effort,yes,yes,no,no,no,no,yes,yes,no,no,yes,baseline - no skill

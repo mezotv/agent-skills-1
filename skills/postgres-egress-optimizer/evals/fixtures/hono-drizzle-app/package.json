@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "db:push": "bunx drizzle-kit push",
-    "format": "bunx prettier --write .",
+    "format": "bunx prettier --write ../../../",
     "test": "bun test"
   },
   "dependencies": {
