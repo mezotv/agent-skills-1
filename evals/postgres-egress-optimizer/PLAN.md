@@ -20,28 +20,32 @@ The SKILL.md bakes in all diagnostic queries, fix patterns, and workflow steps. 
 
 ### Structure
 
+The skill and its evals live in separate top-level directories so that installing the skill (which copies the skill directory) doesn't pull in eval fixtures, diffs, and results.
+
 ```
 skills/postgres-egress-optimizer/
 ├── SKILL.md                          # Placeholder until a version is promoted
-├── references/
-│   └── advanced.md                   # pg_dump, logical replication, PrivateLink
-└── evals/
-    ├── README.md                     # Runbook: how to run evals, prompts, process
-    ├── results.csv                   # Append-only eval results
-    ├── eval-rubric.md                # Problem definitions + scoring criteria
-    ├── skill-versions/               # Numbered skill iterations for eval
-    │   ├── SKILL-v001.md
-    │   ├── SKILL-v002.md
-    │   └── ...
-    ├── diffs/
-    │   └── 01_20260312_A_baseline.diff
-    ├── mock-stats/
-    │   └── pg_stat_statements.md     # Used by Prompt C only, never copied to fixture
-    └── fixtures/
-        └── hono-drizzle-app/
-            ├── src/
-            ├── drizzle/
-            └── tests/
+└── references/
+    └── advanced.md                   # pg_dump, logical replication, PrivateLink
+
+evals/postgres-egress-optimizer/
+├── PLAN.md                           # This file
+├── README.md                         # Runbook: how to run evals, prompts, process
+├── results.csv                       # Append-only eval results
+├── eval-rubric.md                    # Problem definitions + scoring criteria
+├── skill-versions/                   # Numbered skill iterations for eval
+│   ├── SKILL-v001.md
+│   ├── SKILL-v002.md
+│   └── ...
+├── diffs/
+│   └── 01_20260312_A_baseline.diff
+├── mock-stats/
+│   └── pg_stat_statements.md         # Used by Prompt C only, never copied to fixture
+└── fixtures/
+    └── hono-drizzle-app/
+        ├── src/
+        ├── drizzle/
+        └── tests/
 ```
 
 ### SKILL.md content outline
@@ -66,7 +70,7 @@ skills/postgres-egress-optimizer/
 
 4. **Verify** — Run existing tests (if any) to confirm nothing broke. Reset `pg_stat_statements`, wait for measurement window, re-run diagnostics, compare.
 
-**References → `advanced.md`:** Covers scenarios that aren't query optimization — Consumption API monitoring (hourly/daily/monthly egress breakdowns per project), reducing `pg_dump` frequency, tuning logical replication (row filters, column lists on `CREATE PUBLICATION`), PrivateLink for AWS.
+**References → `skills/postgres-egress-optimizer/references/advanced.md`:** Covers scenarios that aren't query optimization — Consumption API monitoring (hourly/daily/monthly egress breakdowns per project), reducing `pg_dump` frequency, tuning logical replication (row filters, column lists on `CREATE PUBLICATION`), PrivateLink for AWS.
 
 ### Description / triggering
 
@@ -82,11 +86,11 @@ The description needs to be broad enough to catch indirect phrasings. Users won'
 - **Execution mode, not plan mode.** The agent applies actual code changes. We evaluate the diff.
 - **Rubric written before first run.** Problem definitions and scoring criteria documented upfront so scoring is objective.
 - **No contamination.** Fixture is copied to a temp directory for each run. The agent never sees the rubric or results.
-- **Versioned skills.** Each skill iteration is saved as a numbered file in `evals/skill-versions/` (SKILL-v001.md, SKILL-v002.md, ...). Eval runs record the version used. The main `SKILL.md` stays as a placeholder until a version is promoted by copying it there.
+- **Versioned skills.** Each skill iteration is saved as a numbered file in `skill-versions/` (SKILL-v001.md, SKILL-v002.md, ...). Eval runs record the version used. The main `SKILL.md` stays as a placeholder until a version is promoted by copying it to `skills/postgres-egress-optimizer/SKILL.md`.
 
 ### Eval rubric
 
-`evals/eval-rubric.md` defines 5 problems and provides yes/no scoring questions for each. This single file is used by both human judges and LLM judges.
+`eval-rubric.md` defines 5 problems and provides yes/no scoring questions for each. This single file is used by both human judges and LLM judges.
 
 **Intentional problems:**
 
@@ -111,17 +115,17 @@ A minimal API app with 5 intentional egress anti-patterns embedded in route hand
 
 **Why Hono + Bun?** Minimal framework boilerplate — route handlers are almost pure query logic. Bun runs TypeScript natively with no build step, has a built-in test runner. The agent spends its time on query patterns, not framework conventions.
 
-Each problem maps to a detection + fix check in the eval rubric (`evals/eval-rubric.md`).
+Each problem maps to a detection + fix check in the eval rubric (`eval-rubric.md`).
 
 ### Prompts
 
-Three prompts of varying specificity, stored in `evals/README.md`:
+Three prompts of varying specificity, stored in `README.md`:
 
 | ID  | Type     | Example                                                                                                                                                |
 | --- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | A   | Vague    | "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."                                                         |
 | B   | Moderate | "Optimize the database egress in this project."                                                                                                        |
-| C   | Specific | "Here are my pg_stat_statements results: [paste contents of evals/mock-stats/pg_stat_statements.md]. Analyze my codebase and fix the worst offenders." |
+| C   | Specific | "Here are my pg_stat_statements results: [paste contents of mock-stats/pg_stat_statements.md]. Analyze my codebase and fix the worst offenders." |
 
 ### Scoring
 
@@ -133,19 +137,19 @@ date,fixture,prompt,model,skill_version,diff_file,p1_detected,p1_fixed,p2_detect
 
 One row per eval run. Append-only. `skill_version` ties each run to a specific skill iteration (e.g., `v001`); empty for baseline runs.
 
-### Eval workflow (documented in `evals/README.md`)
+### Eval workflow (documented in `README.md`)
 
 ```bash
 # 1. Copy fixture to clean workspace (exclude any .git artifacts)
 mkdir /tmp/eval-$(date +%Y%m%d)
-cp -r evals/fixture/hono-drizzle-app/* /tmp/eval-$(date +%Y%m%d)/
+cp -r fixtures/hono-drizzle-app/* /tmp/eval-$(date +%Y%m%d)/
 cd /tmp/eval-$(date +%Y%m%d)
 git init && git add . && git commit -m "baseline"
 
 # 2. Run Claude Code with skill installed + one prompt
 # (skill installed via .claude/skills/ or project config)
 # Use prompt A or B from the table above
-# If using Prompt C, paste the contents of evals/mock-stats/pg_stat_statements.md
+# If using Prompt C, paste the contents of mock-stats/pg_stat_statements.md
 # into the prompt. Do NOT copy the file into the workspace.
 
 # 3. Capture diff
@@ -194,7 +198,7 @@ First few runs: human verifies the judge's scoring. Once trustworthy, human spot
 | No-test-coverage fixture variant                      | v1 fixture includes tests, which gives the agent a verification mechanism. A future fixture without tests would evaluate the harder scenario.                                                                                                                           |
 | Raw SQL / diagnostic-only fixture                     | Without application code, the agent can flag bad queries but can't determine which columns are actually needed or apply fixes.                                                                                                                                          |
 | MCP server integration                                | Expands testing surface significantly. Skill works standalone. MCP support can be added later without changing the core workflow.                                                                                                                                       |
-| pg_dump / logical replication / PrivateLink scenarios | Documented in `references/advanced.md` but not covered by eval fixtures. These affect fewer users than query overfetch.                                                                                                                                                 |
+| pg_dump / logical replication / PrivateLink scenarios | Documented in `skills/postgres-egress-optimizer/references/advanced.md` but not covered by eval fixtures. These affect fewer users than query overfetch.                                                                                                                |
 | Deterministic egress measurement                      | Would require running queries against a seeded live database before/after and comparing transfer bytes. High value but heavy infrastructure. Potential approach: Neon's Elephantshark or `pg_stat_statements` row counts against a real Neon instance via Neon Testing. |
 | Fully automated CI pipeline                           | Eval workflow is scripted but human-initiated. Could be wired into GitHub Actions later.                                                                                                                                                                                |
 | Cross-model comparison                                | Model version is recorded per run. Comparison across models is possible with the data but not part of v1 scope.                                                                                                                                                         |

@@ -14,5 +14,5 @@ description: >-
 # Postgres egress optimizer
 
 This skill is under active development. The current working versions are in
-`evals/skill-versions/`. Once a version consistently beats the baseline in evals,
-it will be promoted here.
+`evals/postgres-egress-optimizer/skill-versions/`. Once a version consistently
+beats the baseline in evals, it will be promoted here.

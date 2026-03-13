@@ -15,7 +15,8 @@ Workflow:
 5. When a version consistently beats baseline, promote it:
 
 ```bash
-cp evals/skill-versions/SKILL-vXXX.md SKILL.md
+# From the repo root:
+cp evals/postgres-egress-optimizer/skill-versions/SKILL-vXXX.md skills/postgres-egress-optimizer/SKILL.md
 ```
 
 ## Prompts
@@ -51,8 +52,8 @@ P=A                # A or B
 RUN_TYPE=skill     # "baseline" or "skill"
 SKILL_VERSION=002  # version number from skill-versions/
 
-# 0. Set up paths and pick prompt
-SKILL_DIR=$(pwd)
+# 0. Set up paths and pick prompt (run from evals/postgres-egress-optimizer/)
+EVALS_DIR=$(pwd)
 SUFFIX=$(date +%Y%m%d)
 
 declare -A PROMPTS
@@ -64,14 +65,14 @@ EVAL_DIR=/tmp/eval-${SUFFIX}_${P}_${TYPE}_$$
 # 1. Copy fixture to a clean workspace
 rm -fR $EVAL_DIR
 mkdir $EVAL_DIR
-cp -r evals/fixtures/hono-drizzle-app/. $EVAL_DIR/
+cp -r fixtures/hono-drizzle-app/. $EVAL_DIR/
 cd $EVAL_DIR
 
 
 # 2a. Copy skill into the workspace (skip for baseline)
 if [ "$RUN_TYPE" = "skill" ]; then
   mkdir -p .claude/skills/postgres-egress-optimizer
-  cp $SKILL_DIR/evals/skill-versions/SKILL-v${SKILL_VERSION}.md .claude/skills/postgres-egress-optimizer/SKILL.md
+  cp $EVALS_DIR/skill-versions/SKILL-v${SKILL_VERSION}.md .claude/skills/postgres-egress-optimizer/SKILL.md
 fi
 
 # 2b commit to git so we can get a diff later
@@ -84,12 +85,12 @@ claude "${PROMPTS[$P]}"
 bun test
 
 # 4. Capture the diff (counter assigned here to avoid collisions with parallel runs)
-NEXT=$(printf "%02d" $(( $(ls $SKILL_DIR/evals/diffs/*.diff 2>/dev/null | wc -l) + 1 )))
-DIFF=evals/diffs/${NEXT}_${SUFFIX}_${P}_${TYPE}.diff
-git diff > $SKILL_DIR/$DIFF
+NEXT=$(printf "%02d" $(( $(ls $EVALS_DIR/diffs/*.diff 2>/dev/null | wc -l) + 1 )))
+DIFF=diffs/${NEXT}_${SUFFIX}_${P}_${TYPE}.diff
+git diff > $EVALS_DIR/$DIFF
 
-# 5. Score: return to skill dir and run scoring command
-cd $SKILL_DIR
+# 5. Score: return to evals dir and run scoring command
+cd $EVALS_DIR
 claude --model claude-sonnet-4-6 "/score-eval $DIFF"
 ```
 
@@ -104,7 +105,7 @@ Open `eval-rubric.md` and answer each yes/no question per problem against the di
 - `prompt` — which prompt was used (A, B)
 - `model` — Claude model version used
 - `skill_version` — version from `skill-versions/` (e.g., `v001`); empty for baseline runs
-- `diff_file` — filename of the saved diff in evals/diffs/ (e.g., `01_20260311_A_baseline.diff`)
+- `diff_file` — filename of the saved diff in diffs/ (e.g., `01_20260311_A_baseline.diff`)
 - `p1_detected` through `p5_detected` — yes/no
 - `p1_fixed` through `p5_fixed` — yes/no
 - `tests_pass` — yes/no (run `bun test` after the agent's changes)
