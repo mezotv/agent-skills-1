@@ -22,18 +22,22 @@ The SKILL.md bakes in all diagnostic queries, fix patterns, and workflow steps. 
 
 ```
 skills/postgres-egress-optimizer/
-├── SKILL.md                          # Core workflow
+├── SKILL.md                          # Placeholder until a version is promoted
 ├── references/
 │   └── advanced.md                   # pg_dump, logical replication, PrivateLink
 └── evals/
     ├── README.md                     # Runbook: how to run evals, prompts, process
     ├── results.csv                   # Append-only eval results
     ├── eval-rubric.md                # Problem definitions + scoring criteria
+    ├── skill-versions/               # Numbered skill iterations for eval
+    │   ├── SKILL-v001.md
+    │   ├── SKILL-v002.md
+    │   └── ...
     ├── diffs/
-    │   └── 2026-03-12_A_baseline.diff
+    │   └── 01_20260312_A_baseline.diff
     ├── mock-stats/
     │   └── pg_stat_statements.md     # Used by Prompt C only, never copied to fixture
-    └── fixture/
+    └── fixtures/
         └── hono-drizzle-app/
             ├── src/
             ├── drizzle/
@@ -51,13 +55,14 @@ skills/postgres-egress-optimizer/
 2. **Analyze codebase** — Cross-reference top offending queries with application code. Identify which columns are actually used downstream. Flag gaps between what's fetched and what's consumed.
 
 3. **Fix** — Apply specific patterns per problem found:
+
    - `SELECT *` → explicit column lists (exclude unused columns, especially large ones)
    - Missing pagination → add LIMIT/OFFSET or cursor-based pagination
    - Repeated identical queries → caching layer or query deduplication
    - Application-side aggregation → server-side SQL aggregations (SUM, COUNT, GROUP BY)
    - ORM overfetching → Drizzle column selection / `.select()` with explicit fields
    - Join duplication → separate queries or subqueries that don't repeat wide columns
-   - Each pattern includes before/after examples in plain SQL and Drizzle
+   - Each pattern includes before/after examples in Drizzle
 
 4. **Verify** — Run existing tests (if any) to confirm nothing broke. Reset `pg_stat_statements`, wait for measurement window, re-run diagnostics, compare.
 
@@ -77,6 +82,7 @@ The description needs to be broad enough to catch indirect phrasings. Users won'
 - **Execution mode, not plan mode.** The agent applies actual code changes. We evaluate the diff.
 - **Rubric written before first run.** Problem definitions and scoring criteria documented upfront so scoring is objective.
 - **No contamination.** Fixture is copied to a temp directory for each run. The agent never sees the rubric or results.
+- **Versioned skills.** Each skill iteration is saved as a numbered file in `evals/skill-versions/` (SKILL-v001.md, SKILL-v002.md, ...). Eval runs record the version used. The main `SKILL.md` stays as a placeholder until a version is promoted by copying it there.
 
 ### Eval rubric
 
@@ -122,10 +128,10 @@ Three prompts of varying specificity, stored in `evals/README.md`:
 `results.csv` columns:
 
 ```
-date,skill_commit,fixture,prompt,model,p1_detected,p1_fixed,p2_detected,p2_fixed,p3_detected,p3_fixed,p4_detected,p4_fixed,p5_detected,p5_fixed,tests_pass,notes
+date,fixture,prompt,model,skill_version,diff_file,p1_detected,p1_fixed,p2_detected,p2_fixed,p3_detected,p3_fixed,p4_detected,p4_fixed,p5_detected,p5_fixed,tests_pass,notes
 ```
 
-One row per eval run. Append-only. Commit hash ties results to a specific version of the skill + fixture.
+One row per eval run. Append-only. `skill_version` ties each run to a specific skill iteration (e.g., `v001`); empty for baseline runs.
 
 ### Eval workflow (documented in `evals/README.md`)
 
@@ -176,13 +182,14 @@ First few runs: human verifies the judge's scoring. Once trustworthy, human spot
 | Scoring               | Binary yes/no per problem (detected/fixed)          |
 | Judge                 | Claude Code with human verification                 |
 | Model                 | Opus 4.6/Claude Code                                |
-| ORM coverage in skill | Plain SQL + Drizzle examples in fix patterns        |
+| ORM coverage in skill | Drizzle examples in fix patterns                    |
 
 ### Excluded (with reasoning)
 
 | Exclusion                                             | Reasoning                                                                                                                                                                                                                                                               |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Additional ORMs (Prisma, SQLAlchemy, TypeORM)         | Skill shows plain SQL + Drizzle. Pattern is clear for adding more.                                                                                                                                                                                                      |
+| Additional ORMs (Prisma, SQLAlchemy, TypeORM)         | Skill shows Drizzle. Pattern is clear for adding more.                                                                                                                                                                                                                  |
+| Vanilla SQL fixture app                               | A fixture using raw SQL (no ORM) would test the skill against a different query style. Can reuse the same eval-rubric structure. Interesting for future coverage.                                                                                                       |
 | Additional fixtures (Next.js, Express, FastAPI, etc.) | One fixture tests the full loop. More can be added using the same eval-rubric structure.                                                                                                                                                                                |
 | No-test-coverage fixture variant                      | v1 fixture includes tests, which gives the agent a verification mechanism. A future fixture without tests would evaluate the harder scenario.                                                                                                                           |
 | Raw SQL / diagnostic-only fixture                     | Without application code, the agent can flag bad queries but can't determine which columns are actually needed or apply fixes.                                                                                                                                          |
