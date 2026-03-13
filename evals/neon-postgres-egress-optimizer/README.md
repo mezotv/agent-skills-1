@@ -91,7 +91,7 @@ fi
 git init && git add . && git commit -m "baseline"
 
 # 2c. Run Claude Code
-claude "${PROMPTS[$P]}"
+claude --model claude-sonnet-4-6 --permission-mode acceptEdits "${PROMPTS[$P]}"
 # Verify Claude Code outputs "Skill(neon-postgres-egress-optimizer) — Successfully loaded skill"
 # at the start of the run. If it doesn't, the skill didn't trigger and the run
 # is effectively a baseline. Note this in the results.csv notes column.
@@ -107,7 +107,7 @@ git diff > $EVALS_DIR/$DIFF
 
 # 5. Score: return to evals dir and run scoring command
 cd $EVALS_DIR
-claude --model claude-sonnet-4-6 "/score-eval $DIFF"
+claude --model claude-sonnet-4-6 --permission-mode acceptEdits "/score-eval $DIFF"
 ```
 
 ## Scoring
