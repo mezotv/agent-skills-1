@@ -1,6 +1,6 @@
 # Eval rubric: Hono + Drizzle fixture
 
-This file defines the scoring criteria for evaluating the postgres-egress-optimizer skill. Used by both human judges and LLM judges.
+This file defines the scoring criteria for evaluating the neon-postgres-egress-optimizer skill. Used by both human judges and LLM judges.
 
 ## Schema
 

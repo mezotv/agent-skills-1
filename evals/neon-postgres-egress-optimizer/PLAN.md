@@ -1,4 +1,4 @@
-# postgres-egress-optimizer — project plan
+# neon-postgres-egress-optimizer — project plan
 
 ## Problem
 
@@ -23,10 +23,10 @@ The SKILL.md bakes in all diagnostic queries, fix patterns, and workflow steps. 
 The skill and its evals live in separate top-level directories so that installing the skill (which copies the skill directory) doesn't pull in eval fixtures, diffs, and results.
 
 ```
-skills/postgres-egress-optimizer/
+skills/neon-postgres-egress-optimizer/
 └── SKILL.md                          # Placeholder until a version is promoted
 
-evals/postgres-egress-optimizer/
+evals/neon-postgres-egress-optimizer/
 ├── PLAN.md                           # This file
 ├── README.md                         # Runbook: how to run evals, prompts, process
 ├── results.csv                       # Append-only eval results
@@ -81,7 +81,7 @@ The description needs to be broad enough to catch indirect phrasings. Users won'
 - **Execution mode, not plan mode.** The agent applies actual code changes. We evaluate the diff.
 - **Rubric written before first run.** Problem definitions and scoring criteria documented upfront so scoring is objective.
 - **No contamination.** Fixture is copied to a temp directory for each run. The agent never sees the rubric or results.
-- **Versioned skills.** Each skill iteration is saved as a numbered file in `skill-versions/` (SKILL-v001.md, SKILL-v002.md, ...). Eval runs record the version used. The main `SKILL.md` stays as a placeholder until a version is promoted by copying it to `skills/postgres-egress-optimizer/SKILL.md`.
+- **Versioned skills.** Each skill iteration is saved as a numbered file in `skill-versions/` (SKILL-v001.md, SKILL-v002.md, ...). Eval runs record the version used. The main `SKILL.md` stays as a placeholder until a version is promoted by copying it to `skills/neon-postgres-egress-optimizer/SKILL.md`.
 
 ### Eval rubric
 

@@ -1,6 +1,6 @@
 # Evals runbook
 
-How to run and score evaluations for the postgres-egress-optimizer skill.
+How to run and score evaluations for the neon-postgres-egress-optimizer skill.
 
 ## Skill versions
 
@@ -16,7 +16,7 @@ Workflow:
 
 ```bash
 # From the repo root:
-cp evals/postgres-egress-optimizer/skill-versions/SKILL-vXXX.md skills/postgres-egress-optimizer/SKILL.md
+cp evals/neon-postgres-egress-optimizer/skill-versions/SKILL-vXXX.md skills/neon-postgres-egress-optimizer/SKILL.md
 ```
 
 ## Prompts
@@ -64,7 +64,7 @@ P=A                # A or B
 RUN_TYPE=skill     # "baseline" or "skill"
 SKILL_VERSION=003  # version number from skill-versions/
 
-# 0. Set up paths and pick prompt (run from evals/postgres-egress-optimizer/)
+# 0. Set up paths and pick prompt (run from evals/neon-postgres-egress-optimizer/)
 EVALS_DIR=$(pwd)
 SUFFIX=$(date +%Y%m%d)
 
@@ -83,8 +83,8 @@ cd $EVAL_DIR
 
 # 2a. Copy skill into the workspace (skip for baseline)
 if [ "$RUN_TYPE" = "skill" ]; then
-  mkdir -p .claude/skills/postgres-egress-optimizer
-  cp $EVALS_DIR/skill-versions/SKILL-v${SKILL_VERSION}.md .claude/skills/postgres-egress-optimizer/SKILL.md
+  mkdir -p .claude/skills/neon-postgres-egress-optimizer
+  cp $EVALS_DIR/skill-versions/SKILL-v${SKILL_VERSION}.md .claude/skills/neon-postgres-egress-optimizer/SKILL.md
 fi
 
 # 2b commit to git so we can get a diff later
@@ -92,10 +92,10 @@ git init && git add . && git commit -m "baseline"
 
 # 2c. Run Claude Code
 claude "${PROMPTS[$P]}"
-# Verify Claude Code outputs "Skill(postgres-egress-optimizer) — Successfully loaded skill"
+# Verify Claude Code outputs "Skill(neon-postgres-egress-optimizer) — Successfully loaded skill"
 # at the start of the run. If it doesn't, the skill didn't trigger and the run
 # is effectively a baseline. Note this in the results.csv notes column.
-# To force the skill, use: claude "/postgres-egress-optimizer ${PROMPTS[$P]}"
+# To force the skill, use: claude "/neon-postgres-egress-optimizer ${PROMPTS[$P]}"
 
 # 3. Run integration tests
 bun test

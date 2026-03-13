@@ -1,5 +1,5 @@
 ---
-name: postgres-egress-optimizer
+name: neon-postgres-egress-optimizer
 description: >-
   Diagnose and fix excessive Postgres egress (network data transfer) in a codebase.
   Use when a user mentions high database bills, unexpected data transfer costs,
@@ -206,7 +206,6 @@ After applying fixes:
 2. **Check the responses** — make sure the API still returns the same data shape. Column selection and pagination changes can break clients that depend on specific fields or full result sets.
 3. **Measure the improvement** — if pg_stat_statements data is available, reset it (`SELECT pg_stat_statements_reset();`), let traffic run, then re-run the diagnostic queries to compare before and after.
 
-## Further reading
+## Advanced scenarios
 
-- https://neon.com/docs/introduction/network-transfer.md
-- https://neon.com/docs/introduction/cost-optimization.md
+For egress problems beyond query optimization — `pg_dump` frequency, logical replication tuning, PrivateLink for AWS, and Consumption API monitoring — see `references/advanced.md`.
