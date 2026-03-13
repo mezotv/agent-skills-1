@@ -98,7 +98,13 @@ Rank findings by estimated egress impact:
 
 ## Step 2: Analyze codebase
 
-For each high-egress query, find the corresponding application code and identify what the response actually uses versus what the query fetches.
+For each query identified in Step 1, or for each database query in the codebase if no stats are available, check:
+
+- Does it select only the columns the response needs?
+- Does it return a bounded number of rows (LIMIT/pagination)?
+- Is it called frequently enough to benefit from caching?
+- Does it fetch raw data that gets aggregated in application code?
+- Does it use a JOIN that duplicates parent data across child rows?
 
 ## Step 3: Fix
 
@@ -122,7 +128,7 @@ SELECT id, name, price, image_urls FROM products;
 
 ### Missing pagination
 
-**Problem:** The query returns the entire table on every request. As the table grows, so does egress — linearly with row count.
+**Problem:** A list endpoint returns all rows with no LIMIT. This is an unbounded egress risk — every new row in the table increases data transfer on every request. Flag this regardless of current table size.
 
 This is easy to miss because the application may work fine with small datasets. But at scale, an unpaginated endpoint returning 10,000 rows with even moderate column widths can transfer hundreds of megabytes per day.
 

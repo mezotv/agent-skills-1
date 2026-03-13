@@ -10,3 +10,5 @@ date,fixture,prompt,model,skill_version,diff_file,p1_detected,p1_fixed,p2_detect
 2026-03-12,hono-drizzle-app,B,opus-4.6-high-effort,v001,09_20260312_B_v001.diff,yes,yes,no,no,no,no,yes,yes,yes,yes,yes,with skill
 2026-03-12,hono-drizzle-app,A,opus-4.6-high-effort,v001,10_20260312_A_v001.diff,yes,yes,yes,yes,no,no,yes,yes,yes,yes,yes,with skill
 2026-03-12,hono-drizzle-app,B,opus-4.6-high-effort,v001,10_20260312_B_v001.diff,yes,yes,no,no,no,no,yes,yes,yes,yes,yes,with skill
+2026-03-12,hono-drizzle-app,A,opus-4.6-high-effort,v002,12_20260312_A_v002.diff,yes,yes,yes,yes,no,no,yes,yes,yes,yes,,with skill
+2026-03-12,hono-drizzle-app,B,opus-4.6-high-effort,v002,13_20260312_B_v002.diff,yes,yes,yes,yes,no,no,yes,yes,yes,yes,yes,with skill
