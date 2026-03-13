@@ -42,6 +42,18 @@ Baseline established from 7 runs without the skill (4 × Prompt A, 3 × Prompt B
 
 Tests passed on all 7 runs. Full results in `results.csv`.
 
+## Results summary
+
+| Problem                          | Baseline (7 runs) | v001 (4 runs) | v002 (4 runs) |
+| -------------------------------- | ----------------- | ------------- | ------------- |
+| P1: SELECT \* unused columns     | 100%              | 100%          | 100%          |
+| P2: Missing pagination           | 0%                | 25%           | 100%          |
+| P3: High-frequency query         | 0%                | 0%            | 0%            |
+| P4: Application-side aggregation | 100%              | 100%          | 100%          |
+| P5: Join duplication             | 43%               | 100%          | 100%          |
+
+P3 is expected to miss — it requires pg_stat_statements data which prompts A and B don't provide. All runs pass tests. Full data in `results.csv`.
+
 ## Running an eval
 
 ```bash

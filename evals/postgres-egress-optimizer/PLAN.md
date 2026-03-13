@@ -59,7 +59,6 @@ evals/postgres-egress-optimizer/
 2. **Analyze codebase** — Cross-reference top offending queries with application code. Identify which columns are actually used downstream. Flag gaps between what's fetched and what's consumed.
 
 3. **Fix** — Apply specific patterns per problem found:
-
    - `SELECT *` → explicit column lists (exclude unused columns, especially large ones)
    - Missing pagination → add LIMIT/OFFSET or cursor-based pagination
    - Repeated identical queries → caching layer or query deduplication
@@ -121,10 +120,10 @@ Each problem maps to a detection + fix check in the eval rubric (`eval-rubric.md
 
 Three prompts of varying specificity, stored in `README.md`:
 
-| ID  | Type     | Example                                                                                                                                                |
-| --- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A   | Vague    | "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."                                                         |
-| B   | Moderate | "Optimize the database egress in this project."                                                                                                        |
+| ID  | Type     | Example                                                                                                                                          |
+| --- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A   | Vague    | "My Neon bill spiked to $400 this month, most of it is data transfer. Help me figure out why."                                                   |
+| B   | Moderate | "Optimize the database egress in this project."                                                                                                  |
 | C   | Specific | "Here are my pg_stat_statements results: [paste contents of mock-stats/pg_stat_statements.md]. Analyze my codebase and fix the worst offenders." |
 
 ### Scoring
