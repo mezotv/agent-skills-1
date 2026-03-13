@@ -24,9 +24,7 @@ The skill and its evals live in separate top-level directories so that installin
 
 ```
 skills/postgres-egress-optimizer/
-├── SKILL.md                          # Placeholder until a version is promoted
-└── references/
-    └── advanced.md                   # pg_dump, logical replication, PrivateLink
+└── SKILL.md                          # Placeholder until a version is promoted
 
 evals/postgres-egress-optimizer/
 ├── PLAN.md                           # This file
@@ -68,8 +66,6 @@ evals/postgres-egress-optimizer/
    - Each pattern includes before/after examples in Drizzle
 
 4. **Verify** — Run existing tests (if any) to confirm nothing broke. Reset `pg_stat_statements`, wait for measurement window, re-run diagnostics, compare.
-
-**References → `skills/postgres-egress-optimizer/references/advanced.md`:** Covers scenarios that aren't query optimization — Consumption API monitoring (hourly/daily/monthly egress breakdowns per project), reducing `pg_dump` frequency, tuning logical replication (row filters, column lists on `CREATE PUBLICATION`), PrivateLink for AWS.
 
 ### Description / triggering
 
@@ -197,7 +193,6 @@ First few runs: human verifies the judge's scoring. Once trustworthy, human spot
 | No-test-coverage fixture variant                      | v1 fixture includes tests, which gives the agent a verification mechanism. A future fixture without tests would evaluate the harder scenario.                                                                                                                           |
 | Raw SQL / diagnostic-only fixture                     | Without application code, the agent can flag bad queries but can't determine which columns are actually needed or apply fixes.                                                                                                                                          |
 | MCP server integration                                | Expands testing surface significantly. Skill works standalone. MCP support can be added later without changing the core workflow.                                                                                                                                       |
-| pg_dump / logical replication / PrivateLink scenarios | Documented in `skills/postgres-egress-optimizer/references/advanced.md` but not covered by eval fixtures. These affect fewer users than query overfetch.                                                                                                                |
 | Deterministic egress measurement                      | Would require running queries against a seeded live database before/after and comparing transfer bytes. High value but heavy infrastructure. Potential approach: Neon's Elephantshark or `pg_stat_statements` row counts against a real Neon instance via Neon Testing. |
 | Fully automated CI pipeline                           | Eval workflow is scripted but human-initiated. Could be wired into GitHub Actions later.                                                                                                                                                                                |
 | Cross-model comparison                                | Model version is recorded per run. Comparison across models is possible with the data but not part of v1 scope.                                                                                                                                                         |
@@ -210,7 +205,7 @@ First few runs: human verifies the judge's scoring. Once trustworthy, human spot
 - [Tweet: "why is Neon so expensive" ($2000/month)](https://x.com/francisco_m001/status/2023471431024054356) — The customer pain point this skill addresses
 - [Reduce network transfer costs](https://neon.com/docs/introduction/network-transfer) — Primary source material for the skill's diagnostic queries and fix patterns
 - [pg_stat_statements](https://neon.com/docs/extensions/pg_stat_statements) — The core diagnostic extension the skill relies on
-- [Cost optimization](https://neon.com/docs/introduction/cost-optimization) — Broader cost guide that `advanced.md` should reference
+- [Cost optimization](https://neon.com/docs/introduction/cost-optimization) — Broader cost guide
 - [Elephantshark](https://neon.com/blog/elephantshark-monitor-postgres-network-traffic) — Open-source Postgres traffic monitor, relevant to the "deterministic egress measurement" exclusion
 - [Agent Skills specification](https://agentskills.io/specification) — SKILL.md format spec (naming, frontmatter, 500-line limit)
 - [Extend Claude with skills](https://code.claude.com/docs/en/skills) — Create, manage, and share skills to extend Claude’s capabilities in Claude Code. Includes custom commands and bundled skills.

@@ -62,7 +62,7 @@ setopt INTERACTIVE_COMMENTS 2>/dev/null # allow # comments when pasting into zsh
 # Variables
 P=A                # A or B
 RUN_TYPE=skill     # "baseline" or "skill"
-SKILL_VERSION=002  # version number from skill-versions/
+SKILL_VERSION=003  # version number from skill-versions/
 
 # 0. Set up paths and pick prompt (run from evals/postgres-egress-optimizer/)
 EVALS_DIR=$(pwd)
