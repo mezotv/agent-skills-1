@@ -80,6 +80,10 @@ git init && git add . && git commit -m "baseline"
 
 # 2c. Run Claude Code
 claude "${PROMPTS[$P]}"
+# Verify Claude Code outputs "Skill(postgres-egress-optimizer) — Successfully loaded skill"
+# at the start of the run. If it doesn't, the skill didn't trigger and the run
+# is effectively a baseline. Note this in the results.csv notes column.
+# To force the skill, use: claude "/postgres-egress-optimizer ${PROMPTS[$P]}"
 
 # 3. Run integration tests
 bun test
