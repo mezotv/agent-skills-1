@@ -53,30 +53,95 @@ console.log(`Launching ${count} parallel eval runs...`);
 console.log(`Logs: ${logDir}/\n`);
 
 const children = Array.from({ length: count }, (_, i) => {
-  const logFile = Bun.file(`${logDir}/run-${i + 1}.log`);
-  const proc = Bun.spawn(["bun", EVAL_RUN, ...childArgs], {
-    stdout: logFile,
-    stderr: logFile,
-    stdin: "ignore",
-  });
-  return proc.exited.then((code) => ({ index: i + 1, code }));
+  const runId = `${i + 1}`;
+  const mainLogPath = `${logDir}/run-${runId}.main.log`;
+  const summaryPath = `${logDir}/run-${runId}.summary.json`;
+  const logFile = Bun.file(mainLogPath);
+  const proc = Bun.spawn(
+    ["bun", EVAL_RUN, ...childArgs, "--log-dir", logDir, "--run-id", runId],
+    {
+      stdout: logFile,
+      stderr: logFile,
+      stdin: "ignore",
+    },
+  );
+  return proc.exited.then((code) => ({
+    index: i + 1,
+    code,
+    summaryPath,
+    mainLogPath,
+  }));
 });
 
+type RunSummary = {
+  phases?: {
+    claude?: { exitCode?: number | null };
+    tests?: {
+      attempts?: number;
+      passed?: boolean;
+      passedAttempt?: number | null;
+    };
+    score?: { exitCode?: number | null };
+  };
+  artifacts?: {
+    runDiff?: string;
+  };
+};
+
+async function readSummary(path: string): Promise<RunSummary | null> {
+  try {
+    const text = await Bun.file(path).text();
+    return JSON.parse(text) as RunSummary;
+  } catch {
+    return null;
+  }
+}
+
 const results = await Promise.all(children);
+const summaries = await Promise.all(
+  results.map((r) => readSummary(r.summaryPath)),
+);
 
 const passed = results.filter((r) => r.code === 0);
 const failed = results.filter((r) => r.code !== 0);
 
-console.log(`\n--- Summary ---`);
+console.log(`\n--- summary ---`);
 console.log(`Passed: ${passed.length}/${count}`);
 console.log(`Failed: ${failed.length}/${count}`);
+console.log("\nRun details:");
 
-if (failed.length > 0) {
-  console.log("\nFailed runs:");
-  for (const r of failed) {
+for (const result of results) {
+  const summary = summaries[result.index - 1];
+  if (!summary?.phases) {
     console.log(
-      `  run ${r.index} (exit ${r.code}): ${logDir}/run-${r.index}.log`,
+      `  run ${result.index}: exit ${result.code} | summary missing (${result.summaryPath})`,
     );
+    console.log(`    main log: ${result.mainLogPath}`);
+    continue;
+  }
+
+  const claudeExit = summary.phases.claude?.exitCode;
+  const tests = summary.phases.tests;
+  const scoreExit = summary.phases.score?.exitCode;
+  const testsStatus = tests?.passed
+    ? `pass (attempt ${tests.passedAttempt ?? tests.attempts ?? "?"})`
+    : `fail (${tests?.attempts ?? "?"} attempts)`;
+  const scoreStatus =
+    scoreExit === null || scoreExit === undefined
+      ? "skipped"
+      : scoreExit === 0
+        ? "ok"
+        : `fail (${scoreExit})`;
+
+  console.log(
+    `  run ${result.index}: exit ${result.code} | claude ${claudeExit === 0 ? "ok" : `fail (${claudeExit ?? "?"})`} | tests ${testsStatus} | score ${scoreStatus}`,
+  );
+
+  if (result.code !== 0) {
+    const runDiff = summary.artifacts?.runDiff;
+    if (runDiff) console.log(`    run diff: ${runDiff}`);
+    console.log(`    summary:  ${result.summaryPath}`);
+    console.log(`    main log: ${result.mainLogPath}`);
   }
 }
 

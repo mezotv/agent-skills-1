@@ -65,11 +65,21 @@ The script handles the full lifecycle:
 
 1. Copies the fixture to a temp workspace (`/tmp/eval-...`)
 2. Installs the skill version (if `--skill` provided)
-3. Initializes git and launches Claude Code interactively
-4. After Claude Code exits, pauses for confirmation
-5. Runs `bun test` (with retry on failure)
-6. Captures the diff to `diffs/` (race-safe for parallel runs)
+3. Initializes git and launches Claude Code
+4. Captures a run-local diff artifact in the run log directory
+5. Runs `bun test` (with retry + short delay on failure)
+6. Captures a canonical diff to `diffs/` (race-safe for parallel runs)
 7. Launches Claude Code to score against `eval-rubric.md`
+
+Each run also writes phase logs and metadata to a log directory:
+
+- `run-<id>.claude.log`
+- `run-<id>.tests.log`
+- `run-<id>.score.log`
+- `run-<id>.diff`
+- `run-<id>.summary.json`
+
+You can set this explicitly with `--log-dir` and `--run-id` (used by `eval-batch.ts` automatically).
 
 Verify Claude Code outputs "Skill(neon-postgres-egress-optimizer) — Successfully loaded skill" at the start of the run. If it doesn't, the skill didn't trigger and the run is effectively a baseline. Note this in the `results.csv` notes column.
 
