@@ -285,7 +285,7 @@ const claudeExit = await runCommandToPhaseLog({
     // "--allowedTools",
     // "Bash",
     "--append-system-prompt",
-    "Never ask the user for confirmation. Apply changes directly. Run `bun test` to verify the changes.",
+    "NEVER ask the user any questions. If anything is ambiguous, choose the most reasonable assumption and continue. Run `bun test` before final output. If tests fail, fix the code and rerun `bun test` until tests pass. Do not provide a final response while any test is failing.",
     "--print",
     claudePrompt,
   ],
