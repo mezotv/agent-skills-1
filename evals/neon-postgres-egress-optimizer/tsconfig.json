@@ -26,5 +26,5 @@
     "noUnusedParameters": true,
     "noPropertyAccessFromIndexSignature": true
   },
-  "include": ["eval-run.ts", "eval-batch.ts"]
+  "include": ["eval-run.ts", "eval-batch.ts", "eval-stats.ts"]
 }

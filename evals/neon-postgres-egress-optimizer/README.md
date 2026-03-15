@@ -30,29 +30,29 @@ Prompt C (specific, with pg_stat_statements data) is planned but deferred until 
 
 ## Baseline
 
-Baseline established from 7 runs without the skill (4 × Prompt A, 3 × Prompt B) on Opus 4.6 high effort.
+Baseline established from 89 runs without the skill on Opus 4.6 high effort.
 
-| Problem                          | Without skill           | Notes                                                                                                                    |
-| -------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| P1: SELECT \* unused columns     | 7/7 detected, 7/7 fixed | Always caught. The skill won't improve this.                                                                             |
-| P2: Missing pagination           | 0/7 detected, 0/7 fixed | Never caught. The skill must deliver this.                                                                               |
-| P3: High-frequency query         | 0/7 detected, 0/7 fixed | Never caught. Expected — only detectable via pg_stat_statements data.                                                    |
-| P4: Application-side aggregation | 7/7 detected, 7/7 fixed | Always caught. The skill won't improve this.                                                                             |
-| P5: Join duplication             | 3/7 detected, 3/7 fixed | ~50% catch rate. When missed, the agent applies P1-style column narrowing instead of fixing the structural join problem. |
+| Problem                          | Without skill               | Notes                                                                                                            |
+| -------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| P1: SELECT \* unused columns     | 89/89 detected, 89/89 fixed | Always caught. The skill won't improve this.                                                                     |
+| P2: Missing pagination           | 0/89 detected, 0/89 fixed   | Never caught. This is the primary target for the skill.                                                          |
+| P3: High-frequency query         | 0/89 detected, 0/89 fixed   | Never caught. Expected — only detectable via pg_stat_statements data.                                            |
+| P4: Application-side aggregation | 87/89 detected, 87/89 fixed | Almost always caught. Rare misses come from omitting the aggregation issue entirely.                             |
+| P5: Join duplication             | 25/89 detected, 25/89 fixed | ~28% catch rate. When missed, the agent applies P1-style column narrowing instead of fixing the structural join. |
 
-Tests passed on all 7 runs. Full results in `results.csv`.
+Tests passed on 89/89 baseline runs. Full results in `results.csv`.
 
 ## Results summary
 
-| Problem                          | Baseline (7 runs) | v001 (4 runs) | v002 (4 runs) |
-| -------------------------------- | ----------------- | ------------- | ------------- |
-| P1: SELECT \* unused columns     | 100%              | 100%          | 100%          |
-| P2: Missing pagination           | 0%                | 25%           | 100%          |
-| P3: High-frequency query         | 0%                | 0%            | 0%            |
-| P4: Application-side aggregation | 100%              | 100%          | 100%          |
-| P5: Join duplication             | 43%               | 100%          | 100%          |
+| Problem                          | baseline (89 runs) | v003 (42 runs) |
+| -------------------------------- | ------------------ | -------------- |
+| P1: SELECT \* unused columns     | 100%               | 100%           |
+| P2: Missing pagination           | 0%                 | 57%            |
+| P3: High-frequency query         | 0%                 | 12%            |
+| P4: Application-side aggregation | 98%                | 100%           |
+| P5: Join duplication             | 28%                | 100%           |
 
-P3 is expected to miss — it requires pg_stat_statements data which prompts A and B don't provide. All runs pass tests. Full data in `results.csv`.
+P3 is expected to miss on prompts A/B — it requires pg_stat_statements data. Tests passed on all 139 runs. v001/v002 data (4 runs each) omitted due to small sample size; full history in `results.csv`.
 
 ## Running an eval
 
@@ -101,6 +101,16 @@ Open `eval-rubric.md` and answer each yes/no question per problem against the di
 - `p1_fixed` through `p5_fixed` — yes/no
 - `tests_pass` — yes/no (run `bun test` after the agent's changes)
 - `notes` — free text for anything notable
+
+## Stats
+
+Generate the baseline and results summary tables from `results.csv`:
+
+```bash
+./eval-stats.ts
+```
+
+Copy the output into the baseline and results summary sections above.
 
 ## Judge
 
