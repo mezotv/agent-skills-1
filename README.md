@@ -22,6 +22,18 @@ It all starts with the `SKILL.md` file in the skill's directory. It's the entry 
 
 A comprehensive index of Neon Serverless Postgres documentation and best practices to set your agents up for success.
 
+### Claimable Postgres
+
+[skills/claimable-postgres](skills/claimable-postgres/SKILL.md)
+
+Provision instant temporary Postgres databases via Claimable Postgres by Neon ([neon.new](https://neon.new)) with no login, signup, or credit card. Supports REST API, CLI, and SDK.
+
+### Neon Postgres Egress Optimizer
+
+[skills/neon-postgres-egress-optimizer](skills/neon-postgres-egress-optimizer/SKILL.md)
+
+Diagnose and fix excessive Postgres egress (network data transfer) in a codebase. Use when investigating high database bills, unexpected data transfer costs, or query overfetching.
+
 ## Installation
 
 ```bash
@@ -81,4 +93,12 @@ Create a new Neon branch using the API
 
 ```
 Use the serverless driver for edge functions
+```
+
+```
+Give me a quick temporary Postgres database
+```
+
+```
+Why is my Neon bill so high?
 ```
