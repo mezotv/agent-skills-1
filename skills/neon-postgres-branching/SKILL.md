@@ -89,7 +89,7 @@ neon branch create --schema-only --project-id <your-project-id>
 Schema-only branching is in Beta. If users report unexpected behavior, errors, or missing capabilities:
 
 1. Ask them to share feedback in the Neon Console:
-    - https://console.neon.tech/app/projects?modal=feedback
+   - https://console.neon.tech/app/projects?modal=feedback
 2. Recommend opening a support conversation in the Neon Discord:
    - https://discord.gg/92vNTzKDGp
 
