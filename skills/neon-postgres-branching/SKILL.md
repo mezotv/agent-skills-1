@@ -4,7 +4,7 @@ description: >-
   Choose and create the right Neon branch type for testing and development.
   Use when users ask about Neon branching, migration testing with real data,
   isolated test environments, schema-only branch workflows for sensitive data,
-  or branch creation via Neon CLI. Triggers include "Neon branch",
+  or branch creation via Neon CLI or Neon MCP. Triggers include "Neon branch",
   "test migrations safely", "branch production data", "schema-only branch",
   and "sensitive data testing".
 ---
@@ -26,19 +26,29 @@ Use this decision rule first:
 If the request is ambiguous, ask one clarifying question:
 "Do you need realistic data for testing, or only schema structure because the data is sensitive?"
 
-## CLI-First Workflow
+## Tool Selection: CLI or MCP
 
-Before suggesting any `neon` command, check if the CLI is installed:
+Always support both Neon CLI and Neon MCP server. Prefer the tool the user already has installed and authenticated.
 
-```bash
-neon --version
-```
+MCP link: https://neon.com/docs/ai/neon-mcp-server.md
+CLI link: https://neon.com/docs/reference/cli-quickstart
 
-If the command fails:
+### Selection order
 
-1. Tell the user Neon CLI is not installed.
-2. Direct them to install it using the Neon CLI quickstart: https://neon.com/docs/reference/cli-quickstart
-3. Resume branch creation steps after installation succeeds.
+1. Check MCP first in MCP-enabled environments:
+   - If Neon MCP tools are available and authenticated (for example, listing projects works), use MCP.
+2. If MCP is unavailable or not authenticated, check CLI:
+   - Run `neon --version` to confirm CLI is installed.
+   - Run `neon projects list` to confirm auth/context.
+3. If CLI is missing, direct installation via quickstart.
+4. If CLI is installed but not authenticated, guide the user through `neon auth` (or API key auth), then continue.
+
+### MCP branch flow
+
+1. Choose normal vs schema-only based on data sensitivity and migration-testing goals.
+2. Use branch tools (for example, `create_branch`) to create the branch.
+3. Validate with read tools (for example, `describe_branch`).
+4. For migration workflows, prefer branch-based migration flows before applying to main.
 
 ## Create a Normal Branch (Preferred for Real-Data Migration Testing)
 
@@ -49,7 +59,7 @@ Link: https://neon.com/docs/introduction/branching.md
 
 ### Steps
 
-1. Verify CLI availability with `neon --version`.
+1. Use MCP if already available/authenticated; otherwise verify CLI with `neon --version`.
 2. Ensure project context is set (`neon set-context --project-id <your-project-id>`) or include `--project-id` on commands.
 3. Create branch:
 
@@ -71,7 +81,7 @@ Link: https://neon.com/docs/guides/branching-schema-only.md
 
 ### Steps
 
-1. Verify CLI availability with `neon --version`.
+1. Use MCP if already available/authenticated; otherwise verify CLI with `neon --version`.
 2. Create schema-only branch:
 
 ```bash
@@ -123,7 +133,7 @@ If the user asks for process recommendations (not just a single command), sugges
 
 1. Recommend a normal branch and explain why.
 2. Share docs link: https://neon.com/docs/introduction/branching
-3. Run/check: `neon --version`
+3. Check the available/authenticated tool path first (MCP, otherwise CLI with `neon --version`).
 4. Provide commands:
    - `neon branches create --name migration-test`
    - `neon connection-string migration-test`
@@ -136,7 +146,7 @@ If the user asks for process recommendations (not just a single command), sugges
 
 1. Recommend schema-only branch and explain why.
 2. Share docs link: https://neon.com/docs/guides/branching-schema-only
-3. Run/check: `neon --version`
+3. Check the available/authenticated tool path first (MCP, otherwise CLI with `neon --version`).
 4. Provide command:
    - `neon branch create --schema-only --project-id <your-project-id>`
 5. Mention Beta support path:
@@ -148,4 +158,5 @@ If the user asks for process recommendations (not just a single command), sugges
 - https://neon.com/docs/guides/branch-expiration.md
 - https://neon.com/docs/guides/reset-from-parent.md
 - https://neon.com/docs/guides/neon-github-integration.md
+- https://neon.com/docs/ai/neon-mcp-server
 - https://neon.com/branching
