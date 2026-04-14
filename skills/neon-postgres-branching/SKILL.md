@@ -158,5 +158,5 @@ If the user asks for process recommendations (not just a single command), sugges
 - https://neon.com/docs/guides/branch-expiration.md
 - https://neon.com/docs/guides/reset-from-parent.md
 - https://neon.com/docs/guides/neon-github-integration.md
-- https://neon.com/docs/ai/neon-mcp-server
+- https://neon.com/docs/ai/neon-mcp-server.md
 - https://neon.com/branching
