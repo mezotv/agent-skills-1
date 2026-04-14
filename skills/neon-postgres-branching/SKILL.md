@@ -124,6 +124,15 @@ If the user asks for process recommendations (not just a single command), sugges
 - **PII-aware branching:** If production has sensitive data, derive dev/PR branches from an anonymized branch or use schema-only branches.
 - **Ephemeral lifecycle hygiene:** Set branch expiration and automate cleanup so old branches do not accumulate avoidable storage/history cost.
 
+### Post-creation environment update prompt
+
+After branch creation, ask whether the user wants to update local environment credentials to point at the new branch.
+
+- Ask: "Do you want me to update your `.env` `DATABASE_URL` to this new branch connection string?"
+- If yes, write the new branch connection string to the requested env file/key.
+- If no, leave credentials unchanged and share the connection string for manual use.
+- Never overwrite an existing env key without explicit confirmation.
+
 ## Examples
 
 ### Example 1: Migration testing with realistic data
