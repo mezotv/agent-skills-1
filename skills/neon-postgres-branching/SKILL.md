@@ -11,7 +11,8 @@ description: >-
 
 # Neon Postgres Branching
 
-Help users choose between Neon's two branch creation approaches:
+The outcome of this skill should be a created Neon branch (or a clear, actionable next step if creation cannot proceed).
+Choose the correct branch type, then execute branch creation via MCP or CLI.
 
 - **Normal branch** for realistic migration and query testing with real data.
 - **Schema-only branch (Beta)** for sensitive data workflows where structure is needed without copying rows.
