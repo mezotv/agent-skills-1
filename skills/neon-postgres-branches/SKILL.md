@@ -39,10 +39,10 @@ CLI link: https://neon.com/docs/reference/cli-quickstart
 1. Check MCP first in MCP-enabled environments:
    - If Neon MCP tools are available and authenticated (for example, listing projects works), use MCP.
 2. If MCP is unavailable or not authenticated, check CLI:
-   - Run `neon --version` to confirm CLI is installed.
-   - Run `neon projects list` to confirm auth/context.
+   - Run `neonctl --version` to confirm CLI is installed.
+   - Run `neonctl projects list` to confirm auth/context.
 3. If CLI is missing, direct installation via quickstart.
-4. If CLI is installed but not authenticated, guide the user through `neon auth` (or API key auth), then continue.
+4. If CLI is installed but not authenticated, guide the user through `neonctl auth` (or API key auth), then continue.
 5. If both MCP and CLI paths are unsuccessful, use the Neon REST API:
    - https://neon.com/docs/guides/branching-neon-api.md
 
@@ -62,18 +62,21 @@ Link: https://neon.com/docs/introduction/branching.md
 
 ### Steps
 
-1. Use MCP if already available/authenticated; otherwise verify CLI with `neon --version`.
-2. Ensure project context is set (`neon set-context --project-id <your-project-id>`) or include `--project-id` on commands.
+1. Use MCP if already available/authenticated; otherwise verify CLI with `neonctl --version`.
+2. Ensure project context is set (`neonctl set-context --project-id <your-project-id>`) or include `--project-id` on commands.
 3. Create branch:
 
 ```bash
-neon branches create --name <branch-name>
+neonctl branches create \
+  --name <branch-name> \
+  --parent <parent-branch-id-or-name> \
+  --expires-at 2026-12-15T18:02:16Z
 ```
 
 4. Optionally fetch a connection string for the new branch:
 
 ```bash
-neon connection-string <branch-name>
+neonctl connection-string <branch-name>
 ```
 
 ## Create a Schema-Only Branch (Beta, Sensitive Data)
@@ -84,17 +87,26 @@ Link: https://neon.com/docs/guides/branching-schema-only.md
 
 ### Steps
 
-1. Use MCP if already available/authenticated; otherwise verify CLI with `neon --version`.
+1. Use MCP if already available/authenticated; otherwise verify CLI with `neonctl --version`.
 2. Create schema-only branch:
 
 ```bash
-neon branch create --schema-only
+neonctl branches create \
+  --name <schema-only-branch-name> \
+  --parent <parent-branch-id-or-name> \
+  --schema-only \
+  --expires-at 2026-12-15T18:02:16Z
 ```
 
 If multiple projects exist, include:
 
 ```bash
-neon branch create --schema-only --project-id <your-project-id>
+neonctl branches create \
+  --name <schema-only-branch-name> \
+  --parent <parent-branch-id-or-name> \
+  --schema-only \
+  --project-id <your-project-id> \
+  --expires-at 2026-12-15T18:02:16Z
 ```
 
 ### Beta Support Guidance (Mandatory)
@@ -134,19 +146,21 @@ Link: https://neon.com/docs/guides/reset-from-parent.md
 ### CLI usage
 
 ```bash
-neon branches reset <id|name> --parent
+neonctl branches reset <id|name> --parent --preserve-under-name <backup-branch-name>
 ```
 
 If project context is not already set, include project ID:
 
 ```bash
-neon branches reset <id|name> --parent --project-id <project-id>
+neonctl branches reset <id|name> --parent --preserve-under-name <backup-branch-name> --project-id <project-id>
 ```
+
+`--preserve-under-name` keeps the pre-reset state as a backup branch for rollback, but adds one extra branch to clean up later.
 
 Optional context setup to avoid repeating `--project-id`:
 
 ```bash
-neon set-context --project-id <project-id>
+neonctl set-context --project-id <project-id>
 ```
 
 ### Console and API usage
@@ -193,10 +207,10 @@ After branch creation, ask whether the user wants to update local environment cr
 
 1. Recommend a normal branch and explain why.
 2. Share docs link: https://neon.com/docs/introduction/branching
-3. Check the available/authenticated tool path first (MCP, otherwise CLI with `neon --version`).
+3. Check the available/authenticated tool path first (MCP, otherwise CLI with `neonctl --version`).
 4. Provide commands:
-   - `neon branches create --name migration-test`
-   - `neon connection-string migration-test`
+   - `neonctl branches create --name migration-test --parent main --expires-at 2026-12-15T18:02:16Z`
+   - `neonctl connection-string migration-test`
 
 ### Example 2: Sensitive data development workflow
 
@@ -206,9 +220,9 @@ After branch creation, ask whether the user wants to update local environment cr
 
 1. Recommend schema-only branch and explain why.
 2. Share docs link: https://neon.com/docs/guides/branching-schema-only
-3. Check the available/authenticated tool path first (MCP, otherwise CLI with `neon --version`).
+3. Check the available/authenticated tool path first (MCP, otherwise CLI with `neonctl --version`).
 4. Provide command:
-   - `neon branch create --schema-only --project-id <your-project-id>`
+   - `neonctl branches create --name compliance-dev --parent main --schema-only --project-id <your-project-id> --expires-at 2026-12-15T18:02:16Z`
 5. Mention Beta support path:
    - https://console.neon.tech/app/projects?modal=feedback
    - https://discord.gg/92vNTzKDGp
