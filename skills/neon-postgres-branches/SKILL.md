@@ -1,12 +1,12 @@
 ---
-name: neon-postgres-branching
+name: neon-postgres-branches
 description: >-
   Choose and create the right Neon branch type for testing and development.
   Use when users ask about Neon branching, migration testing with real data,
   isolated test environments, schema-only branch workflows for sensitive data,
   or branch creation via Neon CLI or Neon MCP. Triggers include "Neon branch",
   "test migrations safely", "branch production data", "schema-only branch",
-  and "sensitive data testing".
+  "reset branch" and "sensitive data testing".
 ---
 
 # Neon Postgres Branching
@@ -43,6 +43,8 @@ CLI link: https://neon.com/docs/reference/cli-quickstart
    - Run `neon projects list` to confirm auth/context.
 3. If CLI is missing, direct installation via quickstart.
 4. If CLI is installed but not authenticated, guide the user through `neon auth` (or API key auth), then continue.
+5. If both MCP and CLI paths are unsuccessful, use the Neon REST API:
+   - https://neon.com/docs/guides/branching-neon-api.md
 
 ### MCP branch flow
 
@@ -103,6 +105,54 @@ Schema-only branching is in Beta. If users report unexpected behavior, errors, o
    - https://console.neon.tech/app/projects?modal=feedback
 2. Recommend opening a support conversation in the Neon Discord:
    - https://discord.gg/92vNTzKDGp
+
+## Reset from parent
+
+Use this when a child branch has drifted and the user wants a clean refresh from the parent branch's latest schema and data.
+
+Link: https://neon.com/docs/guides/reset-from-parent.md
+
+### What it does
+
+- Fully replaces the child branch schema and data with the parent's latest state.
+- Does not merge; local changes on the child branch are lost.
+- Keeps the same connection details, but active connections are briefly interrupted during reset.
+
+### When to recommend it
+
+- Development or staging branch is too far behind production.
+- User wants to start a new feature from a clean parent-aligned state.
+- Team wants to refresh staging from production for consistent testing baselines.
+
+### Hard constraints and blockers
+
+- Only child branches can be reset (root branches and schema-only root branches cannot be reset from parent).
+- If the target branch has children, reset is blocked until those child branches are removed.
+- After a parent branch is restored from snapshot, reset-from-parent may be unavailable for up to 24 hours.
+- Reset-from-parent always uses the current parent state; use Instant restore for point-in-time recovery needs.
+
+### CLI usage
+
+```bash
+neon branches reset <id|name> --parent
+```
+
+If project context is not already set, include project ID:
+
+```bash
+neon branches reset <id|name> --parent --project-id <project-id>
+```
+
+Optional context setup to avoid repeating `--project-id`:
+
+```bash
+neon set-context --project-id <project-id>
+```
+
+### Console and API usage
+
+- **Console:** Open the target child branch, then select **Reset from parent** from **Actions**.
+- **API:** Use the restore endpoint for the branch and set `source_branch_id` to the parent branch ID.
 
 ## Notes and Caveats
 
@@ -166,7 +216,6 @@ After branch creation, ask whether the user wants to update local environment cr
 ## Further reading
 
 - https://neon.com/docs/guides/branch-expiration.md
-- https://neon.com/docs/guides/reset-from-parent.md
 - https://neon.com/docs/guides/neon-github-integration.md
 - https://neon.com/docs/ai/neon-mcp-server.md
 - https://neon.com/branching
