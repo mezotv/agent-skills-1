@@ -106,6 +106,10 @@ Neon Auth is also embedded in the Neon JS SDK - so depending on your use case, y
 
 Use this when the user is planning isolated environments, schema migration testing, preview deployments, or branch lifecycle automation.
 
+### Branching workflow
+
+For normal vs schema-only branching, sensitive-data workflows, and CLI/MCP/API steps to create and validate branches, read **`neon-postgres-branches`** (`skills/neon-postgres-branches/SKILL.md`).
+
 Key points:
 
 - Branches are instant, copy-on-write clones (no full data copy).
