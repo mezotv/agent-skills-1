@@ -130,23 +130,27 @@ Remind users to use environment variables for credentials, never commit connecti
 
 ## Branch-First Dev Flow
 
-Default to a branch-first loop that mirrors `git`: one isolated Neon branch per feature, so nothing leaks between features and there are no shared connection strings to copy around. This loop is built on three CLI commands:
+Default to a branch-first loop that mirrors `git`: one isolated Neon branch per feature, so nothing leaks between features and there are no shared connection strings to copy around. Two commands drive it — `link` once per project, then `checkout` per feature — and a third, `env pull`, runs automatically under the hood so the branch you pin is immediately usable:
 
 - `neonctl link` — Interactively links the workspace to a Neon org, project, and branch, writing the IDs to a git-ignored `.neon` file. Run once per project. Once linked, project- and branch-scoped commands no longer need `--project-id` or `--branch` (for example, `neonctl branch list`).
 - `neonctl checkout <branch-name>` — Creates the branch if it doesn't exist, or checks out the existing one, by updating only the branch pointer in `.neon`. Run without a name for an interactive picker. It does not touch code or local Postgres.
-- `neonctl env pull` — Fetches the current branch's Neon environment variables into `.env.local` (override the target with `--env`). No branch ID needed; it reads `.neon`.
+- `neonctl env pull` — Fetches the current branch's Neon environment variables (`DATABASE_URL`, …) into your existing `.env`, or `.env.local` if you don't have one (override the target with `--file`). No branch ID needed; it reads `.neon`. **`link` and `checkout` run this for you by default**, so you rarely call it directly.
 
-Run `link` once when starting on a project:
-
-```bash
-neonctl link
-```
-
-Then for each feature, check out an isolated branch and pull its connection details:
+Run `link` once when starting on a project, then `checkout` per feature:
 
 ```bash
-neonctl checkout dev-add-search
-neonctl env pull
+neonctl link                     # once; also pulls the linked branch's env
+neonctl checkout dev-add-search  # per feature; also pulls the branch's env
 ```
 
-Build against that branch, then repeat `checkout` + `env pull` for the next feature. As the agent, drive this loop yourself: run `checkout` and `env pull` between tasks to get a fresh, isolated database per feature with no shared state to corrupt.
+Because `link` and `checkout` pull env by default, the branch's `DATABASE_URL` lands in your local `.env` automatically — build against it, then `checkout` the next branch and repeat. As the agent, drive this loop yourself: run `checkout` between tasks to get a fresh, isolated database per feature with no shared state to corrupt.
+
+### Opting out of local env vars
+
+If env vars are injected at runtime instead of written to disk — or you simply don't want secrets in the working tree — pass `--no-env-pull` to `link` / `checkout` and supply the env another way:
+
+- `neon-env run -- <your dev command>` (from `@neondatabase/env`) fetches the branch's vars from your `neon.ts` and injects them into the child process at runtime — no `.env` file needed.
+- `neonctl dev` injects the same vars into your local dev server.
+- `parseEnv` / `fetchEnv` from `@neondatabase/env` give typed, validated access to the vars in code.
+
+When an agent should not write a local `.env`, instruct it (for example in your `AGENTS.md`) to run `neonctl checkout <branch> --no-env-pull` and rely on runtime injection.
