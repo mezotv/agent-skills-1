@@ -58,8 +58,9 @@ Common doc URLs are organized in the topic links below. If you need a page not l
 ## Choosing the Right Skill
 
 - Working with the database, connections, branching, autoscaling, or the CLI/MCP/API → `neon-postgres` (and `neon-postgres-branches` for branch workflows).
-
-Dedicated skills for Object Storage, Compute Functions, and AI Gateway are coming as those preview services roll out.
+- Storing and serving files that branch with the database → `neon-object-storage`.
+- Running long-running serverless functions next to the database → `neon-functions`.
+- Routing, logging, or rate-limiting LLM calls → `neon-ai-gateway`.
 
 ### Installing the Right Skill
 
@@ -69,16 +70,16 @@ First check whether the target skill is already installed and accessible (for ex
 npx skills add neondatabase/agent-skills -s <skill-name>
 ```
 
-Replace `<skill-name>` with the skill you need (for example, `neon-postgres` or `neon-postgres-branches`). Useful flags:
+Replace `<skill-name>` with the skill you need (for example, `neon-object-storage`, `neon-functions`, or `neon-ai-gateway`). Useful flags:
 
 - `-g` — install globally instead of into the current project.
 - `-y` — non-interactive mode (skip prompts).
 - `-a <agent-name>` — pick the target agent(s) for non-interactive mode.
 
-For example, to install the Postgres skill globally for a specific agent without prompts:
+For example, to install the object storage skill globally for a specific agent without prompts:
 
 ```bash
-npx skills add neondatabase/agent-skills -s neon-postgres -g -y -a <agent-name>
+npx skills add neondatabase/agent-skills -s neon-object-storage -g -y -a <agent-name>
 ```
 
 ## Getting Started with Neon
@@ -118,7 +119,7 @@ Prefer the CLI over the MCP server unless the user instructs otherwise, since it
 
 Once the CLI, MCP server, and agent skills are installed, ensure the local workspace is linked to a Neon project through the `neonctl init` flow. If it isn't, run `npx -y neonctl link` to let the user interactively link a project. This produces a `.neon` file pointing to the organization, project, and branch the user wants to work with.
 
-For Postgres-specific setup, consult the `neon-postgres` skill (and `neon-postgres-branches` for branch workflows). Dedicated skills for the other services are coming as they roll out.
+For each Neon service, consult that component's agent skill for service-specific setup instructions (Functions, Postgres, Object Storage, Gateway, and so on).
 
 ### Resume Support
 
