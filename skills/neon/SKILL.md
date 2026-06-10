@@ -120,7 +120,15 @@ Once the CLI, MCP server, and agent skills are installed, ensure the local works
 
 For Postgres-specific setup, consult the `neon-postgres` skill (and `neon-postgres-branches` for branch workflows). Dedicated skills for the other services are coming as they roll out.
 
-### Branch-First Dev Flow
+### Resume Support
+
+If resuming setup, check what's already configured (MCP connection, `.env` with `DATABASE_URL`, dependencies, schema) and continue from the next incomplete step.
+
+### Security Reminders
+
+Remind users to use environment variables for credentials, never commit connection strings, and use least-privilege database roles.
+
+## Branch-First Dev Flow
 
 Default to a branch-first loop that mirrors `git`: one isolated Neon branch per feature, so nothing leaks between features and there are no shared connection strings to copy around. This loop is built on three CLI commands:
 
@@ -142,11 +150,3 @@ neonctl env pull
 ```
 
 Build against that branch, then repeat `checkout` + `env pull` for the next feature. As the agent, drive this loop yourself: run `checkout` and `env pull` between tasks to get a fresh, isolated database per feature with no shared state to corrupt.
-
-### Resume Support
-
-If resuming setup, check what's already configured (MCP connection, `.env` with `DATABASE_URL`, dependencies, schema) and continue from the next incomplete step.
-
-### Security Reminders
-
-Remind users to use environment variables for credentials, never commit connection strings, and use least-privilege database roles.
