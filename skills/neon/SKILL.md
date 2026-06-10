@@ -150,6 +150,7 @@ Because `link` and `checkout` pull env by default, the branch's `DATABASE_URL` l
 If env vars are injected at runtime instead of written to disk — or you simply don't want secrets in the working tree — pass `--no-env-pull` to `link` / `checkout` and supply the env another way:
 
 - `neon-env run -- <your dev command>` (from `@neondatabase/env`) fetches the branch's vars from your `neon.ts` and injects them into the child process at runtime — no `.env` file needed. This is the runtime counterpart to the on-disk `env pull`.
+- `neon-env export` (from `@neondatabase/env`) prints the branch's env to stdout as dotenv lines or, with `--format json`, JSON — for piping into another env manager rather than running a command. For example, [varlock](https://varlock.dev) can bulk-load it from a `.env.schema` with `@setValuesBulk(exec("neon-env export --format json"), format=json)`.
 - `fetchEnv` from `@neondatabase/env` is the programmatic version of the same thing: resolve the branch's env in code at runtime instead of shelling out to `neon-env run`.
 - `neonctl dev` injects the same vars into your local dev server — it's part of Neon Functions local development (a private preview feature).
 
