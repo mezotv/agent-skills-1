@@ -23,7 +23,7 @@ Neon bundles several backend primitives for building apps and agents that all br
 - **Postgres** — Serverless Postgres that scales and branches with your app. _Generally available._
 - **Auth** — Managed authentication with users and sessions stored in Postgres. _Generally available._
 - **Object Storage** — S3-compatible object storage that branches with your projects. _Preview / early access._
-- **Compute Functions** — Serverless functions without timeouts running close to your database. _Preview / early access._
+- **Compute Functions** — Long-running serverless functions running close to your database — for WebSocket servers, long agent HTTP streams, APIs, and server-sent event servers. _Preview / early access._
 - **AI Gateway** — One API for all frontier and open-source models, with routing, logging, and cost controls, powered by Databricks. _Preview / early access._
 
 ### Preview Service Availability
