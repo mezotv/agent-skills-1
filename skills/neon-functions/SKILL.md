@@ -146,6 +146,54 @@ process.on("SIGINT", () => {
 
 - **Runtime:** Node.js 24, one request at a time per isolate (extra requests queue, they don't fail), memory fixed at 2048 MiB during the preview. Slugs must match `^[a-z0-9]{1,20}$`. State held in module scope is per-isolate and in-memory only — persist anything that must survive eviction in Postgres.
 
+## Functions as an agent backend (Next.js and similar frameworks)
+
+A Neon Function is a great home for an AI agent precisely because it **doesn't time out** the way lambda-style serverless does (15-minute budget, see above). But that advantage disappears the moment you **proxy the agent stream through your web app's backend** — a Next.js route handler, Remix/SvelteKit/Nuxt action, etc. hosted on Vercel, Netlify, Cloudflare, and the like. Those platforms cap serverless/edge execution at short windows (often ~10–60s, sometimes up to ~300s), so a long agent or image/video generation stream gets cut off mid-response even though the Neon Function would happily keep going.
+
+**The fix: call the function directly from the client.** Don't route the long request through your app server.
+
+```
+Browser ──(Authorization: Bearer <JWT>)──▶  Neon Function (agent)   ✅ no host timeout
+Browser ──▶ your app backend ──▶ Neon Function                       ❌ host cuts the stream
+```
+
+- Mint a **short-lived JWT** on your app backend (e.g. better-auth's `jwt` plugin, NextAuth, or your own signer) — that call is fast and well within host limits.
+- Hand the token to the client and have it call the Neon Function **directly** (cross-origin), e.g. with the Vercel AI SDK: `new DefaultChatTransport({ api: NEON_FUNCTION_URL, fetch })` where `fetch` attaches `Authorization: Bearer <token>`. Your app server is never in the path of the long stream.
+- Add **CORS** so the browser can reach it (handle `OPTIONS`, set `Access-Control-Allow-Origin`/`-Headers`).
+
+> [!WARNING]
+> A Neon Function has a **public HTTPS URL — it is reachable by anyone.** A direct client→function call means there is no app backend in front of it to gate access, so **you must authenticate the function yourself.** Verify a JWT (e.g. against your app's JWKS), check a shared secret / API key, or validate a session token at the top of the handler and reject anything else. Never deploy an unauthenticated agent.
+
+```typescript
+// src/index.ts — verify the caller before doing any work
+import { createRemoteJWKSet, jwtVerify } from "jose";
+
+const jwks = createRemoteJWKSet(new URL(`${process.env.AUTH_BASE_URL}/api/auth/jwks`));
+
+export default {
+  async fetch(request: Request) {
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(request) });
+
+    const auth = request.headers.get("authorization");
+    if (!auth?.toLowerCase().startsWith("bearer ")) {
+      return new Response("Unauthorized", { status: 401, headers: cors(request) });
+    }
+    try {
+      const { payload } = await jwtVerify(auth.slice(7), jwks, {
+        issuer: process.env.AUTH_BASE_URL,
+        audience: process.env.AUTH_BASE_URL,
+      });
+      const userId = payload.sub; // scope the agent to this user
+      // ... run the agent, return result.toUIMessageStreamResponse({ headers: cors(request) })
+    } catch {
+      return new Response("Unauthorized", { status: 401, headers: cors(request) });
+    }
+  },
+};
+```
+
+Pass the JWKS/issuer URL to the function via its `env` (see Environment variables). Persist anything you need to keep (generated images, history) in Postgres — module state doesn't survive eviction.
+
 ## Availability
 
 Neon Functions is a preview (early access) feature available only on new projects in the `us-east-2` region. Confirm the user's Neon project is a new project in `us-east-2`; it can't be enabled on existing projects. Functions usage isn't billed during the private preview. If the user does not yet have access, point them to the private beta sign-up: https://neon.com/blog/were-building-backends#access
