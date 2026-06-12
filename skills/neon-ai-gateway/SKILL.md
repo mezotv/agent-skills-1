@@ -173,7 +173,6 @@ The Anthropic SDK and google-genai work the same way for native provider feature
 Use a model's catalog ID directly in the `model` field — e.g. `claude-sonnet-4-6`, `gpt-5-mini`, `gemini-2-5-flash`. No provider prefix is needed. To look up the exact identifiers the gateway serves, which underlying model each maps to, and their context windows, pricing, and capabilities, use any of:
 
 - **models.dev Neon provider page: https://models.dev/providers/neon** — the canonical, always-current list of the Neon provider's model IDs and their underlying models. The machine-readable catalog is at https://models.dev/api.json (the `neon` key).
-- **Neon API:** `GET https://console.neon.tech/api/v2/ai_gateway/models` returns each model's `id`, `provider`, and `display_name`.
 - **Models doc:** see Further reading.
 
 ## Availability
