@@ -24,7 +24,7 @@ Use this skill to help the user send model calls through the gateway, wire it in
 
 Reach for the AI Gateway whenever an app or agent needs to call an LLM and the user would rather not manage model providers themselves:
 
-- **One credential instead of many provider accounts.** A single Neon credential reaches the whole `databricks-*` catalog across seven providers. No separate OpenAI / Anthropic / Google billing, keys, or signups to provision and rotate.
+- **One credential instead of many provider accounts.** A single Neon credential reaches the entire model catalog across seven providers. No separate OpenAI / Anthropic / Google billing, keys, or signups to provision and rotate.
 - **Switch models without rewiring.** The unified endpoint is OpenAI-compatible and works with every model in the catalog — change one `model` field to move between Claude, GPT, and Gemini. Standard SDKs (OpenAI, Anthropic, google-genai) work with just a base-URL change.
 - **AI follows your branches.** Each branch has its own gateway endpoint, scoped with the same lineage as your database. AI requests from a preview/feature branch are isolated to that branch — the same isolation your data already gets — which makes preview, CI, and agent environments self-contained.
 - **No extra infrastructure, and it's already next to your data.** The gateway lives inside your Neon project (and is injected into Neon Functions automatically), runs on the same Databricks infrastructure that serves trillions of tokens a month, and supports streaming (SSE) out of the box.
@@ -33,7 +33,7 @@ If the user already has a deep, single-provider integration and no interest in N
 
 ## What It Does
 
-- **One API for all models** — Frontier and open-source models behind a single endpoint, addressed by `databricks-`prefixed IDs (e.g. `databricks-claude-sonnet-4-6`, `databricks-gpt-5-mini`, `databricks-gemini-2-5-flash`).
+- **One API for all models** — Frontier and open-source models behind a single endpoint, addressed by their catalog ID (e.g. `claude-sonnet-4-6`, `gpt-5-mini`, `gemini-2-5-flash`).
 - **Standard SDKs, one URL change** — OpenAI SDK and AI SDK (OpenAI-compatible MLflow/Responses routes), Anthropic SDK (native Messages), google-genai (native Gemini).
 - **Branch-scoped** — Each branch gets its own gateway host; the Neon credential authorizes requests for that branch and its descendants.
 - **Streaming** — Server-sent events work on all endpoints with no extra configuration.
@@ -88,7 +88,7 @@ import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 const result = streamText({
-  model: openai("databricks-gpt-5-mini"),
+  model: openai("gpt-5-mini"),
   messages,
   tools: {
     image_generation: openai.tools.imageGeneration({
@@ -107,7 +107,7 @@ import { neon } from "@neondatabase/ai-sdk-provider/v1";
 import { generateText } from "ai";
 
 const { text } = await generateText({
-  model: neon("databricks-claude-haiku-4-5"), // or databricks-gpt-5-3-codex, databricks-gemini-2-5-flash, ...
+  model: neon("claude-haiku-4-5"), // or gpt-5-3-codex, gemini-2-5-flash, ...
   prompt: "Summarize Postgres for me.",
 });
 ```
@@ -151,12 +151,20 @@ const client = new OpenAI({
 });
 
 const res = await client.chat.completions.create({
-  model: "databricks-claude-sonnet-4-6", // swap to databricks-gpt-5-4, databricks-gemini-2-5-flash, ...
+  model: "claude-sonnet-4-6", // swap to gpt-5-4, gemini-2-5-flash, ...
   messages: [{ role: "user", content: "What is Neon?" }],
 });
 ```
 
-The Anthropic SDK (`baseURL: .../ai-gateway/anthropic`) and google-genai (`baseUrl: .../ai-gateway/gemini`) work the same way for native provider features. Fetch the current model catalog from the Neon API (`GET https://console.neon.tech/api/v2/ai_gateway/models`) or the Models doc — all IDs use the `databricks-` prefix.
+The Anthropic SDK (`baseURL: .../ai-gateway/anthropic`) and google-genai (`baseUrl: .../ai-gateway/gemini`) work the same way for native provider features.
+
+## Model identifiers
+
+Use a model's catalog ID directly in the `model` field — e.g. `claude-sonnet-4-6`, `gpt-5-mini`, `gemini-2-5-flash`. No provider prefix is needed. To look up the exact identifiers the gateway serves, which underlying model each maps to, and their context windows, pricing, and capabilities, use any of:
+
+- **models.dev Neon provider page: https://models.dev/providers/neon** — the canonical, always-current list of the Neon provider's model IDs and their underlying models. The machine-readable catalog is at https://models.dev/api.json (the `neon` key).
+- **Neon API:** `GET https://console.neon.tech/api/v2/ai_gateway/models` returns each model's `id`, `provider`, and `display_name`.
+- **Models doc:** see Further reading.
 
 ## Availability
 
