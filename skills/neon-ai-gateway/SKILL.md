@@ -61,21 +61,21 @@ neonctl deploy   # provisions the gateway on the linked branch
 
 When `preview.aiGateway` is enabled, Neon injects the gateway credentials as **OpenAI-standard** env vars (so the OpenAI SDK and AI SDK work from the environment with no config), plus `NEON_`-branded aliases. Inside a deployed Neon Function these are injected automatically; locally, `neonctl env pull` writes them to `.env`/`.env.local` (or use `neon-env run -- <cmd>` to inject at runtime without a file):
 
-| Variable                   | Meaning                                                                                                                   |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`           | Gateway bearer token (a Neon credential, `nt_live_...`)                                                                   |
-| `OPENAI_BASE_URL`          | OpenAI-dialect route on the branch gateway host: `https://<branch-id>-api.ai.<region>.aws.neon.tech/ai-gateway/openai/v1` |
-| `NEON_AI_GATEWAY_TOKEN`    | Same bearer as `OPENAI_API_KEY` (survives a user overriding `OPENAI_*` with their own keys)                               |
-| `NEON_AI_GATEWAY_BASE_URL` | Bare branch gateway host (`scheme://host`, **no path**) — the `@neondatabase/ai-sdk-provider` appends routes itself       |
+| Variable                   | Meaning                                                                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `OPENAI_API_KEY`           | Gateway bearer token (a Neon credential, `nt_live_...`)                                                                                          |
+| `OPENAI_BASE_URL`          | Full OpenAI-dialect route, ending in `/ai-gateway/openai/v1`: `https://<branch-id>-api.ai.<region>.aws.neon.tech/ai-gateway/openai/v1`           |
+| `NEON_AI_GATEWAY_TOKEN`    | Same bearer as `OPENAI_API_KEY` (survives a user overriding `OPENAI_*` with their own keys)                                                      |
+| `NEON_AI_GATEWAY_BASE_URL` | Gateway base, ending in `/ai-gateway` (no dialect): `https://<branch-id>-api.ai.<region>.aws.neon.tech/ai-gateway` — append the dialect you want |
 
-Endpoint dialects on the gateway host:
+The two base URLs are **different**: `OPENAI_BASE_URL` already includes the `/openai/v1` (Responses) dialect, while `NEON_AI_GATEWAY_BASE_URL` stops at `/ai-gateway` so you can append whichever dialect you need. The dialects (relative to `NEON_AI_GATEWAY_BASE_URL`) are:
 
-- `/ai-gateway/mlflow/v1` — unified, OpenAI **Chat Completions**-compatible; recommended default, works with every provider.
-- `/ai-gateway/openai/v1` — OpenAI **Responses** API (required for `gpt-5-…-codex` variants and `gpt-5-5-pro`). This is what `OPENAI_BASE_URL` points at, because the `@ai-sdk/openai` provider uses the Responses API by default.
-- `/ai-gateway/anthropic/v1` — native Anthropic Messages (extended thinking, prompt caching).
-- `/ai-gateway/gemini/v1beta/...` — native Gemini `generateContent`.
+- `/mlflow/v1` — unified, OpenAI **Chat Completions**-compatible; recommended default, works with every provider.
+- `/openai/v1` — OpenAI **Responses** API (required for `gpt-5-…-codex` variants and `gpt-5-5-pro`). This is the dialect `OPENAI_BASE_URL` already points at, because the `@ai-sdk/openai` provider uses the Responses API by default.
+- `/anthropic/v1` — native Anthropic Messages (extended thinking, prompt caching).
+- `/gemini/v1beta/...` — native Gemini `generateContent`.
 
-If you need chat completions from the injected `OPENAI_BASE_URL`, swap the dialect: `baseUrl.replace("/openai/v1", "/mlflow/v1")` (this is what the Mastra example does).
+So `${NEON_AI_GATEWAY_BASE_URL}/mlflow/v1` is the chat-completions endpoint, `${NEON_AI_GATEWAY_BASE_URL}/openai/v1` equals `OPENAI_BASE_URL`, and so on. If you only have `OPENAI_BASE_URL` and need chat completions, swap the dialect: `baseUrl.replace("/openai/v1", "/mlflow/v1")` (this is what the Mastra example does).
 
 For typed access, `parseEnv` (from `@neondatabase/env`) returns `env.aiGateway` (`apiKey`, `baseUrl`) derived from your `neon.ts`.
 
@@ -147,7 +147,8 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.NEON_AI_GATEWAY_TOKEN,
-  baseURL: `${process.env.NEON_AI_GATEWAY_BASE_URL}/ai-gateway/mlflow/v1`,
+  // NEON_AI_GATEWAY_BASE_URL ends in /ai-gateway, so append just the dialect:
+  baseURL: `${process.env.NEON_AI_GATEWAY_BASE_URL}/mlflow/v1`,
 });
 
 const res = await client.chat.completions.create({
@@ -156,7 +157,7 @@ const res = await client.chat.completions.create({
 });
 ```
 
-The Anthropic SDK (`baseURL: .../ai-gateway/anthropic`) and google-genai (`baseUrl: .../ai-gateway/gemini`) work the same way for native provider features.
+The Anthropic SDK (`baseURL: ${NEON_AI_GATEWAY_BASE_URL}/anthropic`) and google-genai (`baseUrl: ${NEON_AI_GATEWAY_BASE_URL}/gemini`) work the same way for native provider features.
 
 ## Model identifiers
 
