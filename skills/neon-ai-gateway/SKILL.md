@@ -140,24 +140,33 @@ export const personalAssistant = new Agent({
 
 ## Use with plain SDKs
 
-OpenAI SDK against the unified chat-completions endpoint (model swaps are a one-field change):
+The injected `OPENAI_API_KEY` and `OPENAI_BASE_URL` are OpenAI-standard, so `new OpenAI()` picks them up with **zero config**. Since `OPENAI_BASE_URL` is the OpenAI **Responses** dialect (`/openai/v1`), call the Responses API:
 
 ```typescript
 import OpenAI from "openai";
 
+const client = new OpenAI(); // reads OPENAI_API_KEY + OPENAI_BASE_URL from the env
+
+const res = await client.responses.create({
+  model: "gpt-5-mini", // swap to claude-sonnet-4-6, gemini-2-5-flash, ...
+  input: "What is Neon?",
+});
+```
+
+For the unified **chat-completions** dialect (`/mlflow/v1`) instead, point the client at it. The ergonomic way is to swap the dialect on the injected base URL rather than rebuild it (same move the Mastra example makes):
+
+```typescript
 const client = new OpenAI({
-  apiKey: process.env.NEON_AI_GATEWAY_TOKEN,
-  // NEON_AI_GATEWAY_BASE_URL ends in /ai-gateway, so append just the dialect:
-  baseURL: `${process.env.NEON_AI_GATEWAY_BASE_URL}/mlflow/v1`,
+  baseURL: process.env.OPENAI_BASE_URL!.replace("/openai/v1", "/mlflow/v1"),
 });
 
 const res = await client.chat.completions.create({
-  model: "claude-sonnet-4-6", // swap to gpt-5-4, gemini-2-5-flash, ...
+  model: "claude-sonnet-4-6",
   messages: [{ role: "user", content: "What is Neon?" }],
 });
 ```
 
-The Anthropic SDK (`baseURL: ${NEON_AI_GATEWAY_BASE_URL}/anthropic`) and google-genai (`baseUrl: ${NEON_AI_GATEWAY_BASE_URL}/gemini`) work the same way for native provider features.
+The Anthropic SDK and google-genai work the same way for native provider features — point them at the `/anthropic` and `/gemini` dialects on the gateway base (`${NEON_AI_GATEWAY_BASE_URL}/anthropic`, `${NEON_AI_GATEWAY_BASE_URL}/gemini`).
 
 ## Model identifiers
 
