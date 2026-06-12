@@ -57,10 +57,13 @@ Common doc URLs are organized in the topic links below. If you need a page not l
 
 ## Choosing the Right Skill
 
-- Working with the database, connections, branching, autoscaling, or the CLI/MCP/API → `neon-postgres` (and `neon-postgres-branches` for branch workflows).
-- Storing and serving files that branch with the database → `neon-object-storage`.
-- Running long-running serverless functions next to the database → `neon-functions`.
-- Routing, logging, or rate-limiting LLM calls → `neon-ai-gateway`.
+- Working with the database, connections, schema, queries, autoscaling, or the CLI/MCP/API → `neon-postgres`.
+- Choosing or creating the right branch type for dev, preview, test, or CI workflows → `neon-postgres-branches`.
+- Storing and serving files (uploads, images, blobs) that branch with the database → `neon-object-storage`.
+- Deploying long-running or streaming serverless functions — APIs, agents, SSE/WebSocket servers — next to the database → `neon-functions`.
+- Calling an LLM or routing across model providers with one credential → `neon-ai-gateway`.
+- Provisioning instant, claimable temporary Postgres databases (for example, one per end user or demo) → `claimable-postgres`.
+- Diagnosing or fixing excessive Postgres egress (network data-transfer) costs in a codebase → `neon-postgres-egress-optimizer`.
 
 ### Installing the Right Skill
 
@@ -166,7 +169,7 @@ If env vars are injected at runtime instead of written to disk — or you simply
 
 When an agent should not write a local `.env`, instruct it (for example in your `AGENTS.md`) to run `neonctl checkout <branch> --no-env-pull` and rely on runtime injection.
 
-For reading env you *already* have on disk (typed and validated against your `neon.ts`), use `parseEnv` — see [Neon Infrastructure as Code](#neon-infrastructure-as-code) below.
+For reading env you _already_ have on disk (typed and validated against your `neon.ts`), use `parseEnv` — see [Neon Infrastructure as Code](#neon-infrastructure-as-code) below.
 
 ## Neon Infrastructure as Code
 
@@ -217,11 +220,11 @@ console.log(env.auth.baseUrl);
 
 ### How checkout composes with neon.ts
 
-When a `neon.ts` is present, `neonctl checkout` applies your policy as it **creates** a branch, so a fresh branch comes up with its declared settings and services already in place. Checking out an *existing* branch never reconciles it — apply config changes to it explicitly with `neonctl config apply` (or `neonctl deploy`). The bundled `env pull` also checks `neon.ts` against the linked branch and fails fast if the branch is missing a declared service, pointing you at `neonctl deploy` to provision it, so your local env and the remote branch never drift apart silently.
+When a `neon.ts` is present, `neonctl checkout` applies your policy as it **creates** a branch, so a fresh branch comes up with its declared settings and services already in place. Checking out an _existing_ branch never reconciles it — apply config changes to it explicitly with `neonctl config apply` (or `neonctl deploy`). The bundled `env pull` also checks `neon.ts` against the linked branch and fails fast if the branch is missing a declared service, pointing you at `neonctl deploy` to provision it, so your local env and the remote branch never drift apart silently.
 
 ### Branch configuration
 
-Beyond services, `neon.ts` can program what configuration *new* branches receive via the `branch` property — a function of the branch being evaluated that returns its settings:
+Beyond services, `neon.ts` can program what configuration _new_ branches receive via the `branch` property — a function of the branch being evaluated that returns its settings:
 
 ```typescript
 // neon.ts
