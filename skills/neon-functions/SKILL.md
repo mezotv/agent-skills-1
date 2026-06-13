@@ -159,6 +159,10 @@ process.on("SIGINT", () => {
 
 > Reading `process.env.DATABASE_URL` directly works everywhere. The `with-hono` example in [Setup](#setup) instead uses `@neondatabase/env/v1`'s `parseEnv(config)` to read the same value in a typed, validated way — either is fine.
 
+## Integrations and observability
+
+A function is a long-lived Node.js process running a web-standard request/response handler, so standard Node integration SDKs work unchanged — initialize them once at module load, gated on an env var so local dev and unconfigured branches stay a no-op, and pass secrets via `--env` or `neon.ts` `env`. For wiring up **Sentry** error monitoring across the HTTP framework, the function runtime, and an agent's own caught/fallback failures (the long-running case Functions target), see [references/integrations.md](references/integrations.md).
+
 ## Timeouts and runtime limits
 
 Functions are long-running but **still serverless** — they are a request/response runtime, not a background job runner. The hard limits:
