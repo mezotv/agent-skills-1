@@ -117,12 +117,15 @@ Neon injects branch-scoped connection strings and service URLs at runtime — yo
 
 | Variable                | Notes                                                                                    |
 | ----------------------- | ---------------------------------------------------------------------------------------- |
+| `NEON_BRANCH`           | The branch **name** (e.g. `main`, `preview/foo`). Injected on every branch, including the default. |
 | `DATABASE_URL`          | Pooled connection string. Use for most queries. Present only if the branch has Postgres. |
 | `DATABASE_URL_UNPOOLED` | Direct connection. Use for migrations, `LISTEN`/`NOTIFY`, multi-round-trip transactions. |
 | `NEON_AUTH_BASE_URL`    | Present when Neon Auth is enabled on the branch.                                         |
 | `NEON_DATA_API_URL`     | Present when the Data API is enabled on the branch.                                      |
 
 Object storage (`AWS_*`) and AI Gateway (`OPENAI_*`, `NEON_AI_GATEWAY_*`) vars are also injected when those services are declared — see the `neon-object-storage` and `neon-ai-gateway` skills.
+
+`neonctl env pull` / `neon-env run` / `neonctl dev` emit `NEON_BRANCH` (and the connection strings) into your local dev environment too, so local runs mirror the deployed runtime.
 
 **Your own secrets** are per-deployment. Set them with `--env KEY=VALUE` on `neonctl functions deploy` (repeatable; `--env KEY=` deletes a key, unmentioned keys carry over), or declare them in `neon.ts` under the function's `env` (resolved at deploy time, so read from `process.env` to avoid hardcoding):
 
