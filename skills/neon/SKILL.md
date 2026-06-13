@@ -32,6 +32,19 @@ Object Storage, Compute Functions, and AI Gateway are preview (early access) fea
 
 Early access features are only available on net-new projects created in the `us-east-2` region; they cannot be enabled on existing projects for now. Before guiding a user through any of these services, confirm they are working with a new project in `us-east-2`. If not, they will need to create a new project in that region. Then confirm the user already has early access; otherwise, point them to the private beta sign-up: https://neon.com/blog/were-building-backends#access.
 
+## Architecture: how Neon fits
+
+Neon is **not** a place to host your full-stack app — it's backend primitives (Postgres, Auth, Object Storage, Functions, AI Gateway) that **compose with** the application platform you already use. Host the app on **Vercel** (or Netlify, or another frontend/app host); Neon is the backend it talks to.
+
+A typical setup:
+
+- **Full-stack app on Vercel** (or Netlify) — e.g. Next.js or TanStack Start. It owns your UI and auth (often **Neon Auth**) and talks directly to your **Neon Postgres** database and **Neon Object Storage**.
+- **Reach for Neon Functions when you outgrow the host's limits** — a WebSocket or SSE server, or long-running agents that risk timing out on short, lambda-style serverless. Run that one piece on a Neon Function, next to your data.
+
+You can also move your **whole backend control plane** onto Neon Functions. This is especially useful when the frontend is **client-only** rather than full-stack — TanStack Router, React Router in client mode, and similar SPAs hosted on Vercel or Netlify. The client talks **directly to Neon Functions**, where you build REST APIs and request/response agents, host **MCP servers**, and run anything stateful or that should live close to Postgres and Object Storage. Secure these functions like any standalone REST API — verify a JWT or API key at the top of each handler (see the `neon-functions` skill).
+
+Because Functions are just your backend, they compose with a full-stack app too: if you already have a backend (Next.js route handlers, etc.), Neon Functions sit alongside it, and you can **move pieces between the two** — e.g. relocate a long-running agent or a stateful WebSocket server off your host onto a Function when it needs more runtime.
+
 ## Neon Documentation
 
 The Neon documentation is the source of truth for all Neon-related information. Always verify claims against the official docs before responding. Neon features and APIs evolve, so prefer fetching current docs over relying on training data.

@@ -39,6 +39,15 @@ If the workload is a pure static site, a cron/background job that needs its own 
 - **Branchable** — Each branch runs its own function version at its own URL against its own isolated state.
 - **Same CLI/API** — Deploy and manage via `neonctl`, `neon.ts`, or the Neon API.
 
+## Architecture: where Functions fit
+
+Neon (Functions included) is **backend primitives, not full-stack app hosting**. Host your app on **Vercel** (or Netlify, or another frontend/app host); Functions are the long-running, stateful slice of your backend that lives next to your data. They compose with that platform in two ways:
+
+- **Add a Function to a full-stack app.** Your Next.js / TanStack Start app on Vercel (or Netlify) owns UI, auth (often Neon Auth), and talks directly to Neon Postgres and Object Storage. When one workload outgrows the host's short serverless limits — a WebSocket or SSE server, or a long-running agent that would time out — move just that piece onto a Neon Function. (See [Functions as an agent backend](#functions-as-an-agent-backend-nextjs-and-similar-frameworks) for the client-direct pattern.)
+- **Run the whole backend control plane on Functions.** Especially when the frontend is **client-only** — TanStack Router, React Router in client mode, and similar SPAs hosted on Vercel or Netlify — the client calls Functions **directly**. Build REST APIs and request/response agents, host **MCP servers**, and run anything stateful or that belongs close to Postgres and Object Storage.
+
+Either way, secure a Function like any standalone REST API: verify a JWT or API key at the top of the handler (see the WARNING under [Functions as an agent backend](#functions-as-an-agent-backend-nextjs-and-similar-frameworks)). Because a Function is just your backend, you can **move pieces between your host and Neon** — relocate an agent or a stateful WebSocket server onto a Function when it needs more runtime, and back if needed.
+
 ## Setup
 
 Functions are declared in `neon.ts` (see the `neon` skill for the branch-first workflow and `neon.ts` basics). Add `@neondatabase/config` and declare functions under `preview.functions`, keyed by **slug**:
