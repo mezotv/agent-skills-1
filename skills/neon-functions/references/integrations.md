@@ -26,7 +26,13 @@ Sentry.init({
   dsn: process.env.SENTRY_DSN,
   enabled: Boolean(process.env.SENTRY_DSN),
   tracesSampleRate: 1.0,
-  environment: process.env.NEON_BRANCH_ID ? "branch" : "production",
+  // NEON_BRANCH (the branch id) is injected on EVERY branch, including the default — so it
+  // can't be used as a truthy "is this a branch?" flag. Treat the project's default branch as
+  // "production" (its id passed in via neon.ts env) and tag every other branch by its id.
+  environment:
+    process.env.NEON_BRANCH && process.env.NEON_BRANCH !== process.env.PRODUCTION_BRANCH_ID
+      ? process.env.NEON_BRANCH
+      : "production",
 });
 
 export { Sentry };
@@ -41,7 +47,7 @@ import { Hono } from "hono";
 ```
 
 - **Gate `enabled` on the DSN.** Local dev (`neonctl dev`) and any branch where you haven't configured the secret then become a no-op — no init, no noise — without changing code.
-- **Tag the environment off a branch-scoped var.** Because each Neon branch runs its own copy of the function, deriving `environment` from an injected branch identifier (e.g. `NEON_BRANCH_ID`) keeps preview/branch errors separable from production in the Sentry dashboard.
+- **Tag the environment off the injected branch id.** Each Neon branch runs its own copy of the function and the runtime injects `NEON_BRANCH` (the branch **id**, e.g. `br-rough-smoke-w2hoayam`) into every one of them — including the default branch. Because it's always present, don't use it as a boolean flag (that tags every branch the same). Instead compare it against your default branch id (pass it in as e.g. `PRODUCTION_BRANCH_ID` via `neon.ts` `env`) so the default branch reads as `production` and feature/preview branches are tagged by id — keeping them separable in the Sentry dashboard.
 
 ### 2. Provide the DSN as a deploy-time secret
 
