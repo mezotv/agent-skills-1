@@ -38,7 +38,7 @@ Neon is **not** a place to host your full-stack app — it's backend primitives 
 
 A typical setup:
 
-- **Full-stack app on Vercel** (or Netlify) — e.g. Next.js or TanStack Start. It owns your UI and auth (often **Neon Auth**) and talks directly to your **Neon Postgres** database and **Neon Object Storage**.
+- **Full-stack app on Vercel** (or Netlify) — e.g. Next.js or TanStack Start. It owns your UI and auth (e.g. **Neon Auth**) and talks directly to your **Neon Postgres** database and **Neon Object Storage**.
 - **Reach for Neon Functions when you outgrow the host's limits** — a WebSocket or SSE server, or long-running agents that risk timing out on short, lambda-style serverless. Run that one piece on a Neon Function, next to your data.
 
 You can also move your **whole backend control plane** onto Neon Functions. This is especially useful when the frontend is **client-only** rather than full-stack — TanStack Router, React Router in client mode, and similar SPAs hosted on Vercel or Netlify. The client talks **directly to Neon Functions**, where you build REST APIs and request/response agents, host **MCP servers**, and run anything stateful or that should live close to Postgres and Object Storage. Secure these functions like any standalone REST API — verify a JWT or API key at the top of each handler (see the `neon-functions` skill).
