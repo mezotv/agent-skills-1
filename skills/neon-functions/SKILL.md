@@ -33,7 +33,7 @@ If the workload is a pure static site, a cron/background job that needs its own 
 
 ## What It Does
 
-- **Long-running & serverless** — Built for WebSocket servers, SSE endpoints, long agent HTTP streams, and APIs. Still scales to zero when idle.
+- **Long-running & serverless** — Built for WebSocket servers (see [WebSocket servers](#websocket-servers)), SSE endpoints, long agent HTTP streams, and APIs. Still scales to zero when idle.
 - **Web-standard handler** — A function is any default export with a `fetch(request)` method returning a `Response` (Workers/WinterTC-compatible). A Hono app exports exactly that shape, so `export default app` just works. Runs on Node.js 24, so all Node APIs are available.
 - **Close to your database** — Runs in the branch's region; `DATABASE_URL` injected automatically when the branch has Postgres.
 - **Branchable** — Each branch runs its own function version at its own URL against its own isolated state.
@@ -172,6 +172,126 @@ process.on("SIGINT", () => {
 ```
 
 > Reading `process.env.DATABASE_URL` directly works everywhere. The `with-hono` example in [Setup](#setup) instead uses `@neondatabase/env/v1`'s `parseEnv(config)` to read the same value in a typed, validated way — either is fine.
+
+## WebSocket servers
+
+A WebSocket server is the canonical Functions workload: a long-running handler holds connections open in-process, with no external state store needed to keep a stream coherent. Because a function is a real Node.js process (not a lambda), the WebSocket handshake works the way it does in any Node server — the [`ws`](https://github.com/websockets/ws) library upgrades the socket, and the connection stays alive as long as bytes flow (15-minute heartbeat, see [Timeouts](#timeouts-and-runtime-limits)).
+
+**The return signature is the whole trick.** A function's default export is normally `{ fetch }`. To also accept WebSockets, export an `upgrade` method alongside it — the runtime routes plain HTTP to `fetch` and the WebSocket handshake to `upgrade`:
+
+```typescript
+export default {
+  fetch(request: Request): Response | Promise<Response> { /* HTTP */ },
+  async upgrade(req: IncomingMessage, socket: Duplex, head: Buffer) { /* WS handshake */ },
+};
+```
+
+**Simple example** — raw `ws`, no framework, with auth. Browsers can't set headers on a WebSocket, so authenticate with a `?token=` query param (verify it the same way as the [agent backend](#functions-as-an-agent-backend-nextjs-and-similar-frameworks): `jwtVerify` against your JWKS) before accepting the connection:
+
+```typescript
+// src/index.ts
+import type { IncomingMessage } from "node:http";
+import type { Duplex } from "node:stream";
+import { WebSocketServer, type WebSocket } from "ws";
+
+const clients = new Set<WebSocket>();
+const wss = new WebSocketServer({ noServer: true });
+
+export default {
+  // Plain HTTP (health checks, REST) is handled by fetch.
+  fetch: () => new Response("WebSocket endpoint — connect with ?token=<jwt>"),
+
+  // The runtime hands the WebSocket handshake to upgrade().
+  async upgrade(req: IncomingMessage, socket: Duplex, head: Buffer) {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const identity = await verifyToken(url.searchParams.get("token")); // reject if invalid
+    if (!identity) {
+      socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      clients.add(ws);
+      ws.on("close", () => clients.delete(ws));
+      ws.on("message", (data) => broadcast(data.toString())); // see fan-out below
+    });
+  },
+};
+```
+
+**Hono variant** — identical signature; Hono just serves the `fetch` (HTTP) side, so you keep routing, CORS, middleware, and a JWT-gated `/upload` route for things you can't stream over the socket (e.g. file uploads). The `upgrade` method is unchanged:
+
+```typescript
+// src/index.ts
+import { Hono } from "hono";
+import { WebSocketServer } from "ws";
+
+const app = new Hono();
+app.get("/", (c) => c.text("ok"));
+app.get("/health", (c) => c.json({ ok: true }));
+
+const wss = new WebSocketServer({ noServer: true });
+
+export default {
+  fetch: (request: Request) => app.fetch(request), // Hono owns HTTP
+  async upgrade(req, socket, head) { /* identical to the simple example */ },
+};
+```
+
+### Fan-out across isolates (do not skip this)
+
+Under load the runtime runs **several isolates in parallel, each with its own copy of module state** — so each isolate has its own `clients` set. Broadcasting only to the local set means a client connected to isolate A never sees a message sent by a client on isolate B. The chat would silently fracture.
+
+Fan out across every isolate with **Postgres `LISTEN`/`NOTIFY`**: each isolate `LISTEN`s on a channel over a dedicated **unpooled** connection, and broadcasting means `NOTIFY` (so every isolate, including the sender's, re-broadcasts to its own sockets). This is also why message state must live in Postgres, not module memory — module state doesn't survive eviction.
+
+```typescript
+import { Pool, Client } from "pg";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
+const CHANNEL = "chat_events";
+
+// One dedicated DIRECT connection per isolate, just to receive events.
+// Use DATABASE_URL_UNPOOLED — LISTEN needs a real session, not a pooled one.
+const listener = new Client({ connectionString: process.env.DATABASE_URL_UNPOOLED });
+listener.connect().then(() => listener.query(`LISTEN ${CHANNEL}`));
+listener.on("notification", (msg) => {
+  if (!msg.payload) return;
+  for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg.payload);
+});
+
+// Broadcast by NOTIFYing through the pool — every isolate's listener fires.
+function broadcast(event: unknown) {
+  return pool.query("SELECT pg_notify($1, $2)", [CHANNEL, JSON.stringify(event)]);
+}
+
+// Drain both on eviction so connections close cleanly.
+process.on("SIGINT", () => {
+  Promise.allSettled([pool.end(), listener.end()]).then(() => process.exit(0));
+});
+```
+
+### Client must reconnect
+
+Idle functions are evicted (and isolates restart for operational reasons), so a client's socket **will** drop — treat reconnection as normal, not exceptional. Reconnect with exponential backoff, capped, and **re-mint a fresh token on every attempt** (tokens are short-lived, so a stale one fails the `upgrade` auth check):
+
+```typescript
+let closed = false, retry = 0, timer: ReturnType<typeof setTimeout>;
+
+async function connect() {
+  if (closed) return;
+  const token = await getToken(); // re-mint each attempt; short-lived
+  const ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
+  ws.onopen = () => { retry = 0; };          // reset backoff on success
+  ws.onmessage = (e) => { /* apply the event */ };
+  ws.onclose = () => {
+    if (!closed) timer = setTimeout(connect, Math.min(1000 * 2 ** retry++, 15000));
+  };
+  ws.onerror = () => ws.close();             // let onclose drive the retry
+}
+connect();
+```
+
+A full, verified build of this pattern — Hono `fetch` + `ws` `upgrade`, JWT auth over `?token=`, `LISTEN`/`NOTIFY` fan-out, client backoff, plus image uploads and an in-function moderation agent — is the `with-realtime-chat` example in [`neondatabase/examples`](https://github.com/neondatabase/examples/tree/main/with-realtime-chat).
 
 ## Integrations and observability
 
