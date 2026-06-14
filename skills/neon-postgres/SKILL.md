@@ -121,6 +121,46 @@ Use this when you need to pick the correct transport and driver based on runtime
 
 Link: https://neon.com/docs/connect/choose-connection.md
 
+### Recommended: Drizzle + the right driver for your runtime
+
+Always pair Neon with an ORM such as **Drizzle** for easy schema management and migrations. Pick the driver based on how the runtime treats your code:
+
+- **Long-running or shared-runtime environments → node-postgres (`pg`).** Neon Functions, and any host where the function runtime is shared across requests / runs on fluid compute (e.g. **Vercel** with Fluid compute), keep a module-scope process alive across many requests. Open a `pg` pool **once at module scope** and reuse it across requests.
+- **Fully isolated serverless (Lambda-style) → Neon's serverless driver (`@neondatabase/serverless`).** Hosts like **Netlify** spin up a fresh, isolated instance per request, so a persistent TCP pool can't be reused; the serverless driver queries over HTTP and is built for this.
+
+**Neon Functions / Vercel / fluid compute — Drizzle + node-postgres:**
+
+```typescript
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+
+// Created once at module scope; reused by every request the instance handles.
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
+const db = drizzle(pool);
+```
+
+On **Vercel** (Fluid compute) also attach the pool with `attachDatabasePool` from `@vercel/functions`, so the function runtime drains idle connections before an instance suspends:
+
+```typescript
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { attachDatabasePool } from "@vercel/functions";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+attachDatabasePool(pool); // let the Vercel runtime manage the pooled connections
+const db = drizzle(pool);
+```
+
+**Netlify and other fully-isolated serverless — Drizzle + Neon serverless driver:**
+
+```typescript
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle({ client: sql });
+```
+
 ### Serverless Driver
 
 Use this for `@neondatabase/serverless` patterns, including HTTP queries, WebSocket transactions, and runtime-specific optimizations.
