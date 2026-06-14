@@ -244,24 +244,35 @@ export default {
 };
 ```
 
-**Hono variant** — identical signature; Hono just serves the `fetch` (HTTP) side, so you keep routing, CORS, middleware, and a JWT-gated `/upload` route for things you can't stream over the socket (e.g. file uploads). The `upgrade` method is unchanged:
+**Hono variant.** If you only need Hono for the HTTP side and are happy driving `ws` yourself, just swap `fetch` in the simple example for `app.fetch` and keep the raw `upgrade` — Hono serves routing/middleware, `ws` serves the socket.
+
+To instead declare WebSocket routes _inside_ the Hono app — `app.get("/ws", upgradeWebSocket(...))` with the standard `onOpen`/`onMessage`/`onClose` lifecycle — you need an adapter that bridges Hono's `upgradeWebSocket()` helper to Neon's `upgrade(req, socket, head)`. Hono ships adapters for Cloudflare/Deno/Bun/Node, but **none for Neon**, and the Node one (`@hono/node-ws`) is deprecated and assumes it owns the HTTP server. [references/hono-websockets.md](references/hono-websockets.md) has a small self-contained `createNeonWebSocket(app)` adapter to copy in — it depends only on `hono` and `ws` (no deprecated package; adapted from `@hono/node-ws`, MIT) and returns a ready-to-export `{ fetch, upgrade }` handler. Usage is idiomatic Hono, and because the handshake routes through `app.request`, **auth is just normal route middleware**:
 
 ```typescript
 // src/index.ts
 import { Hono } from "hono";
-import { WebSocketServer } from "ws";
+import { createNeonWebSocket } from "./hono-ws";
 
 const app = new Hono();
-app.get("/", (c) => c.text("ok"));
-app.get("/health", (c) => c.json({ ok: true }));
+const { upgradeWebSocket, handler } = createNeonWebSocket(app);
 
-const wss = new WebSocketServer({ noServer: true });
+app.get(
+  "/ws",
+  async (c, next) => {
+    if (!(await verifyToken(c.req.query("token")))) return c.text("Unauthorized", 401);
+    await next();
+  },
+  upgradeWebSocket(() => ({
+    onOpen: (_evt, ws) => ws.send("welcome"),
+    onMessage: (evt, ws) => ws.send(`echo: ${evt.data}`),
+    onClose: () => console.log("disconnected"),
+  })),
+);
 
-export default {
-  fetch: (request: Request) => app.fetch(request), // Hono owns HTTP
-  async upgrade(req, socket, head) { /* identical to the simple example */ },
-};
+export default handler; // Neon's { fetch, upgrade } contract
 ```
+
+> Don't put header-modifying middleware (e.g. CORS) on an `upgradeWebSocket` route — the helper rewrites headers internally and will throw. The [fan-out](#fan-out-across-isolates-do-not-skip-this) and [reconnect](#client-must-reconnect) guidance below applies unchanged.
 
 ### Fan-out across isolates (do not skip this)
 
