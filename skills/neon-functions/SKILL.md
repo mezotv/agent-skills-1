@@ -111,6 +111,31 @@ To deploy a single function without `neon.ts`: `neonctl functions deploy <slug> 
 
 When `neonctl checkout` _creates_ a new branch and a `neon.ts` is present, it applies the policy automatically — deploying the function to the fresh branch. Checking out an existing branch does not re-deploy; run `neonctl deploy` explicitly.
 
+## Neon Infrastructure as Code (`neon.ts`)
+
+The `preview.functions` block from [Setup](#setup) is part of `neon.ts`, Neon's infrastructure-as-code file — one TypeScript file declares every function (its `source`, display `name`, and `env`) alongside any other branch services, in version control (see the `neon` skill for the full reference). Treat it like Terraform for your branch:
+
+```bash
+neonctl config status   # print the branch's live config (deployed functions)
+neonctl config plan     # dry-run diff of what apply would change
+neonctl config apply    # bundle + deploy the declared functions  (neonctl deploy is an alias)
+```
+
+Functions are **branch-scoped**: each branch runs its own deployment at its own URL. When a `neon.ts` is present, `neonctl checkout` applies the policy as it _creates_ a branch, so a fresh preview/CI branch comes up with the function already deployed. Checking out an _existing_ branch doesn't redeploy — run `neonctl deploy` to apply changes.
+
+Per-branch deploy tuning (e.g. `runtime`) lives in the `branch` closure, keyed by slug, so it can vary by branch without changing which functions exist:
+
+```typescript
+export default defineConfig({
+  preview: {
+    functions: { todos: { name: "todo api", source: "src/index.ts" } },
+  },
+  branch: (branch) => ({
+    preview: { functions: { todos: { runtime: "nodejs24" } } },
+  }),
+});
+```
+
 ## Environment variables
 
 Neon injects branch-scoped connection strings and service URLs at runtime — you don't declare these or pass them at deploy time:
