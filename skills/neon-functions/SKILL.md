@@ -100,6 +100,13 @@ export default app;
 
 This is the `with-hono` example, verified end to end. Create the `pg` pool at module scope (reused across requests on the same isolate) and keep `max` small (e.g. 5), since each isolate keeps its own pool.
 
+`parseEnv(config)` requires _every_ variable the config implies. A function that only talks to Postgres over the pooled URL can scope it to just that key — `parseEnv` then validates and returns only what you asked for (the keys autocomplete from your `neon.ts`):
+
+```typescript
+const { postgres } = parseEnv(config, ["DATABASE_URL"]); // not the unpooled URL, auth, etc.
+const pool = new Pool({ connectionString: postgres.databaseUrl, max: 5 });
+```
+
 ## Develop locally and deploy
 
 ```bash
