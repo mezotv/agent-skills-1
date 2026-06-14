@@ -133,10 +133,11 @@ Always pair Neon with an ORM such as **Drizzle** for easy schema management and 
 ```typescript
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import * as schema from "./schema";
 
 // Created once at module scope; reused by every request the instance handles.
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-const db = drizzle(pool);
+const db = drizzle({ client: pool, schema });
 ```
 
 On **Vercel** (Fluid compute) also attach the pool with `attachDatabasePool` from `@vercel/functions`, so the function runtime drains idle connections before an instance suspends:
@@ -145,10 +146,11 @@ On **Vercel** (Fluid compute) also attach the pool with `attachDatabasePool` fro
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { attachDatabasePool } from "@vercel/functions";
+import * as schema from "./schema";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 attachDatabasePool(pool); // let the Vercel runtime manage the pooled connections
-const db = drizzle(pool);
+const db = drizzle({ client: pool, schema });
 ```
 
 **Netlify and other fully-isolated serverless — Drizzle + Neon serverless driver:**
