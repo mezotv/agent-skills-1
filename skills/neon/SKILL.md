@@ -231,6 +231,21 @@ console.log(env.postgres.databaseUrl);
 console.log(env.auth.baseUrl);
 ```
 
+By default `parseEnv` requires _every_ variable your config implies. When a process only uses a subset — a common case in frameworks like Next.js, where you might read `DATABASE_URL` but never the unpooled URL — pass an array of env-var keys to require and return only those. The keys are typesafe: autocomplete only offers variables your config enables, and the returned shape is narrowed to exactly what you selected (so unselected variables are neither enforced nor present).
+
+```typescript
+import { parseEnv } from "@neondatabase/env/v1";
+import config from "./neon";
+
+// Only DATABASE_URL is required and returned; DATABASE_URL_UNPOOLED is not enforced.
+const { postgres } = parseEnv(config, ["DATABASE_URL"]);
+console.log(postgres.databaseUrl);
+
+// Selecting across services — only these keys are validated/returned.
+const env = parseEnv(config, ["DATABASE_URL", "NEON_AUTH_BASE_URL"]);
+console.log(env.postgres.databaseUrl, env.auth.baseUrl);
+```
+
 ### How checkout composes with neon.ts
 
 When a `neon.ts` is present, `neonctl checkout` applies your policy as it **creates** a branch, so a fresh branch comes up with its declared settings and services already in place. Checking out an _existing_ branch never reconciles it — apply config changes to it explicitly with `neonctl config apply` (or `neonctl deploy`). The bundled `env pull` also checks `neon.ts` against the linked branch and fails fast if the branch is missing a declared service, pointing you at `neonctl deploy` to provision it, so your local env and the remote branch never drift apart silently.
