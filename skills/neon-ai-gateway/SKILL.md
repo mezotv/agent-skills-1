@@ -117,7 +117,7 @@ return result.toUIMessageStreamResponse();
 For multi-provider routing from a single call, the dedicated `@neondatabase/ai-sdk-provider` reads `NEON_AI_GATEWAY_BASE_URL` + `NEON_AI_GATEWAY_TOKEN` and routes each model to the best endpoint (Anthropic → Messages, OpenAI/Codex → Responses, everything else → MLflow):
 
 ```typescript
-import { neon } from "@neondatabase/ai-sdk-provider/v1";
+import { neon } from "@neondatabase/ai-sdk-provider";
 import { generateText } from "ai";
 
 const { text } = await generateText({
@@ -132,7 +132,7 @@ The `with-mastra` example runs a memory-backed agent (threads/messages in Postgr
 
 ```typescript
 import { Agent } from "@mastra/core/agent";
-import { parseEnv } from "@neondatabase/env/v1";
+import { parseEnv } from "@neondatabase/env";
 import config from "../neon";
 
 const env = parseEnv(config);

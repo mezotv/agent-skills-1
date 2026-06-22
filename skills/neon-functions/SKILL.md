@@ -78,7 +78,7 @@ A minimal function — a Hono app that queries the branch's Postgres via the inj
 import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { parseEnv } from "@neondatabase/env/v1";
+import { parseEnv } from "@neondatabase/env";
 import config from "../neon";
 import { todos } from "./db/schema";
 
@@ -203,7 +203,7 @@ process.on("SIGINT", () => {
 });
 ```
 
-> Reading `process.env.DATABASE_URL` directly works everywhere. The `with-hono` example in [Setup](#setup) instead uses `@neondatabase/env/v1`'s `parseEnv(config)` to read the same value in a typed, validated way — either is fine.
+> Reading `process.env.DATABASE_URL` directly works everywhere. The `with-hono` example in [Setup](#setup) instead uses `@neondatabase/env`'s `parseEnv(config)` to read the same value in a typed, validated way — either is fine.
 
 ## WebSocket servers
 
@@ -401,7 +401,7 @@ Functions are long-running but **still serverless** — they are a request/respo
 
 - **Time to first byte: 15 minutes.** Your handler must _begin_ returning a response within 15 minutes of receiving a request. Most handlers finish in seconds; the 15-minute ceiling exists so agent workloads like image/video generation have room.
 - **Heartbeat: 15 minutes.** Open WebSocket/SSE connections stay alive as long as data flows. The timeout only fires when a connection goes silent — send at least one byte every 15 minutes to keep a quiet stream alive.
-- **`waitUntil`: 15 minutes.** Work registered with `waitUntil` keeps the invocation alive after the response is sent, up to 15 minutes — for cleanup like analytics writes and audit logs, **not** a background job runner. (`waitUntil` from `@neondatabase/functions/v1` is currently a stub during the preview.)
+- **`waitUntil`: 15 minutes.** Work registered with `waitUntil` keeps the invocation alive after the response is sent, up to 15 minutes — for cleanup like analytics writes and audit logs, **not** a background job runner. (`waitUntil` from `@neondatabase/functions` is currently a stub during the preview.)
 - **Idle eviction.** With no active connections the platform shuts the function down; it may also evict/restart for operational reasons (active functions can run for hours first). Treat eviction like a process restart — WebSocket/SSE clients must reconnect. The platform sends `SIGINT` before evicting, so register a handler to drain gracefully:
 
 ```typescript
