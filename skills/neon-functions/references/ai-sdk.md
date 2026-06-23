@@ -4,7 +4,7 @@ A Neon Function is a long-lived Node.js 24 process, which makes it a natural hos
 
 The AI SDK is the **recommended** way to build agents on Functions from TypeScript: one set of primitives (`streamText`, `generateText`, tool calling, structured output) over every catalog model. For a memory- and workflow-heavy agent with built-in tracing, use Mastra instead (see [references/mastra-studio.md](mastra-studio.md)); both point at the same gateway.
 
-A full, verified build of this pattern is the [`with-ai-sdk`](https://github.com/neondatabase/examples/tree/main/with-ai-sdk) example: an agent that streams chat and, when asked, generates an image, uploads it to Object Storage, and indexes it in Postgres.
+The pattern below is a complete agent: it streams chat and, when asked, generates an image, uploads it to Object Storage, and indexes it in Postgres.
 
 ## 1. Declare the gateway and the function
 
@@ -137,4 +137,3 @@ curl -N -X POST "$(neonctl functions get agent -o json | jq -r .invocation_url)"
 - Neon AI Gateway dialects, models, and the `@neondatabase/ai-sdk-provider`: the `neon-ai-gateway` skill
 - Storing generated assets that branch with the database: the `neon-object-storage` skill
 - AI SDK agents/tools: https://ai-sdk.dev/docs/foundations/agents
-- The verified build: https://github.com/neondatabase/examples/tree/main/with-ai-sdk

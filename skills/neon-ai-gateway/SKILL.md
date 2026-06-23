@@ -97,7 +97,7 @@ For typed access, `parseEnv` (from `@neondatabase/env`) returns `env.aiGateway` 
 
 The [Vercel AI SDK](https://ai-sdk.dev) is the recommended way to call the gateway and build agents from TypeScript: one set of primitives (`generateText`, `streamText`, tool calling, structured output) over every catalog model, with first-class streaming for the long agent responses Neon Functions are built to host.
 
-The `with-ai-sdk` example deploys an agent as a Neon Function that streams text and generates images. The `@ai-sdk/openai` provider reads `OPENAI_API_KEY` and `OPENAI_BASE_URL` from the injected env automatically — no client config needed; just pick a catalog model:
+On a Neon Function that streams text and generates images, the `@ai-sdk/openai` provider reads `OPENAI_API_KEY` and `OPENAI_BASE_URL` from the injected env automatically — no client config needed; just pick a catalog model:
 
 ```typescript
 import { openai } from "@ai-sdk/openai";
@@ -153,7 +153,7 @@ For a full AI SDK agent deployed as a Neon Function (streaming, tool calling, im
 
 ## Build agents with Mastra (recommended)
 
-[Mastra](https://mastra.ai) is the recommended framework when you want batteries-included agents — built-in memory, tools, workflows, and tracing — with the model still pointed at the gateway. The `with-mastra` example runs a memory-backed agent (threads/messages in Postgres via `@mastra/pg`) as a Neon Function. It reads `env.aiGateway` from `parseEnv` and uses the **chat-completions** (MLflow) dialect:
+[Mastra](https://mastra.ai) is the recommended framework when you want batteries-included agents — built-in memory, tools, workflows, and tracing — with the model still pointed at the gateway. A memory-backed agent (threads/messages in Postgres via `@mastra/pg`) running as a Neon Function reads `env.aiGateway` from `parseEnv` and uses the **chat-completions** (MLflow) dialect:
 
 ```typescript
 import { Agent } from "@mastra/core/agent";

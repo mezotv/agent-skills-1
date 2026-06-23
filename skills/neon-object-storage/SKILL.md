@@ -125,7 +125,7 @@ const url = await files.url("generated/cat.jpg", { expiresIn: 3600 });
 // Plus: files.exists(), files.list({ prefix }), files.copy(), files.delete(), files.signedUploadUrl()
 ```
 
-Swap the adapter import (`files-sdk/s3`, `files-sdk/r2`, `files-sdk/gcs`, …) and the rest of your code is unchanged. The `with-files-sdk` example is the canonical reference for this flow: it uploads local assets into a branchable bucket and prints a presigned URL for each.
+Swap the adapter import (`files-sdk/s3`, `files-sdk/r2`, `files-sdk/gcs`, …) and the rest of your code is unchanged.
 
 ## Working with objects: the AWS S3 client (alternative)
 
@@ -173,9 +173,7 @@ const url = await getSignedUrl(
 );
 ```
 
-This raw-S3 pattern is used end to end in the `with-ai-sdk` example (agent generates an image → `PutObject` into the `images` bucket → row inserted in Postgres → presigned URL returned), the canonical reference for pairing storage with the database on a branch.
-
-A common app pattern: store the bucket key (not the bytes) in a Postgres column, and generate a presigned URL on read. Because both the row and the object live on the same branch, they branch together and never drift.
+The canonical pattern for pairing storage with the database on a branch: an agent generates an image → `PutObject` into the `images` bucket → a row is inserted in Postgres → a presigned URL is returned on read. Store the bucket **key** (not the bytes) in a Postgres column, and presign on read. Because both the row and the object live on the same branch, they branch together and never drift.
 
 `neonctl` also has first-class bucket/object commands (`neonctl bucket create|list|delete`, `neonctl bucket object put|get|list|delete`) for scripting and one-off operations.
 

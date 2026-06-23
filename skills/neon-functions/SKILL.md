@@ -98,7 +98,7 @@ app.get("/todos", async (c) => c.json(await db.select().from(todos)));
 export default app;
 ```
 
-This is the `with-hono` example, verified end to end. Create the `pg` pool at module scope (reused across requests on the same isolate) and keep `max` small (e.g. 5), since each isolate keeps its own pool.
+Create the `pg` pool at module scope (reused across requests on the same isolate) and keep `max` small (e.g. 5), since each isolate keeps its own pool.
 
 `parseEnv(config)` requires _every_ variable the config implies. A function that only talks to Postgres over the pooled URL can scope it to just that key — `parseEnv` then validates and returns only what you asked for (the keys autocomplete from your `neon.ts`):
 
@@ -203,7 +203,7 @@ process.on("SIGINT", () => {
 });
 ```
 
-> Reading `process.env.DATABASE_URL` directly works everywhere. The `with-hono` example in [Setup](#setup) instead uses `@neondatabase/env`'s `parseEnv(config)` to read the same value in a typed, validated way — either is fine.
+> Reading `process.env.DATABASE_URL` directly works everywhere. The function in [Setup](#setup) instead uses `@neondatabase/env`'s `parseEnv(config)` to read the same value in a typed, validated way — either is fine.
 
 ## WebSocket servers
 
@@ -351,7 +351,7 @@ async function connect() {
 connect();
 ```
 
-A full, verified build of this pattern — Hono `fetch` + `ws` `upgrade`, JWT auth over `?token=`, `LISTEN`/`NOTIFY` fan-out, client backoff, plus image uploads and an in-function moderation agent — is the `with-realtime-chat` example in [`neondatabase/examples`](https://github.com/neondatabase/examples/tree/main/with-realtime-chat).
+Together — Hono `fetch` + `ws` `upgrade`, JWT auth over `?token=`, `LISTEN`/`NOTIFY` fan-out, and client backoff — these compose into a complete realtime chat backend on a single function.
 
 ## Server-sent events (SSE)
 
@@ -375,7 +375,7 @@ export default {
 };
 ```
 
-The same rules as WebSockets apply. **Heartbeat:** a stream stays open only while bytes flow — Neon's window is 15 minutes ([Timeouts and runtime limits](#timeouts-and-runtime-limits)) but proxies are usually far stricter, so emit a `: ping\n\n` comment every ~25–30s (shown above) to keep idle streams from being dropped. Keep state in Postgres, and fan out across isolates with [`LISTEN`/`NOTIFY`](#fan-out-across-isolates-do-not-skip-this) (hold a `Set` of stream controllers and `enqueue` to each). `EventSource` is GET-only and can't set headers, so authenticate with a `?token=` query param or cookie, exactly like the WebSocket case. [references/sse.md](references/sse.md) has the full pattern — Hono variant, cross-isolate fan-out, wire format, client, and caveats — and a verified end-to-end build is the `with-realtime-sse` example in [`neondatabase/examples`](https://github.com/neondatabase/examples/tree/main/with-realtime-sse).
+The same rules as WebSockets apply. **Heartbeat:** a stream stays open only while bytes flow — Neon's window is 15 minutes ([Timeouts and runtime limits](#timeouts-and-runtime-limits)) but proxies are usually far stricter, so emit a `: ping\n\n` comment every ~25–30s (shown above) to keep idle streams from being dropped. Keep state in Postgres, and fan out across isolates with [`LISTEN`/`NOTIFY`](#fan-out-across-isolates-do-not-skip-this) (hold a `Set` of stream controllers and `enqueue` to each). `EventSource` is GET-only and can't set headers, so authenticate with a `?token=` query param or cookie, exactly like the WebSocket case. [references/sse.md](references/sse.md) has the full pattern — Hono variant, cross-isolate fan-out, wire format, client, and caveats.
 
 ## MCP servers
 
