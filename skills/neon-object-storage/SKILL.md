@@ -95,9 +95,42 @@ neon-env run -- <your dev command>
 
 Because the names are AWS-standard, the AWS SDK picks up the credentials, endpoint, and region from the environment automatically. The one Neon-specific concern is path-style addressing (`forcePathStyle: true`), which has no AWS env-var equivalent — and the AWS SDKs default to path-style for a custom endpoint anyway. Credentials are branch-scoped and valid for that branch and all its descendants.
 
-## Configure the S3 client
+## Working with objects: the Files SDK (recommended)
 
-Because every value except `forcePathStyle` is read from the standard AWS env chain, the client is tiny — no hardcoded endpoint or keys:
+The simplest, most portable way to read and write objects is the [Files SDK](https://files-sdk.dev) with its `neon` adapter — a small, unified storage API (`upload`, `download`, `url`, `list`, `exists`, `copy`, `delete`, `signedUploadUrl`) over web-standard I/O. It wraps the AWS S3 client under the hood, relabels errors as `Neon error`, and **forces the required path-style addressing on by default**, so there's nothing to misconfigure. Reach for this first.
+
+Install it alongside the AWS S3 peer dependencies the adapter uses internally:
+
+```bash
+npm install files-sdk @aws-sdk/client-s3 @aws-sdk/s3-presigned-post @aws-sdk/s3-request-presigner
+```
+
+The adapter resolves its endpoint, region, and credentials from the same injected `AWS_*` env vars — pass only the bucket name:
+
+```typescript
+import { Files } from "files-sdk";
+import { neon } from "files-sdk/neon";
+
+const files = new Files({ adapter: neon({ bucket: "images" }) });
+
+// Upload — body may be a Buffer, Uint8Array, Blob, File, ReadableStream, or string
+await files.upload("generated/cat.jpg", fileBuffer, { contentType: "image/jpeg" });
+
+// Download
+const file = await files.download("generated/cat.jpg");
+const bytes = new Uint8Array(await file.arrayBuffer());
+
+// Presigned GET — share without exposing credentials (defaults to a 1h expiry)
+const url = await files.url("generated/cat.jpg", { expiresIn: 3600 });
+
+// Plus: files.exists(), files.list({ prefix }), files.copy(), files.delete(), files.signedUploadUrl()
+```
+
+Swap the adapter import (`files-sdk/s3`, `files-sdk/r2`, `files-sdk/gcs`, …) and the rest of your code is unchanged. The `with-files-sdk` example is the canonical reference for this flow: it uploads local assets into a branchable bucket and prints a presigned URL for each.
+
+## Working with objects: the AWS S3 client (alternative)
+
+Neon speaks the S3 API directly, so you can drop down to the AWS SDK whenever you prefer the native client or already depend on it. Because every value except `forcePathStyle` is read from the standard AWS env chain, the client is tiny — no hardcoded endpoint or keys:
 
 ```typescript
 import { S3Client } from "@aws-sdk/client-s3";
@@ -111,7 +144,7 @@ const s3 = new S3Client({
 
 If you prefer typed access instead of reading `process.env` directly, `parseEnv` (from `@neondatabase/env`) returns a validated `env.storage` namespace (`accessKeyId`, `secretAccessKey`, `endpoint`, `region`, `forcePathStyle`) derived from your `neon.ts` — see the `neon` skill.
 
-## Upload, download, and presign
+Then upload, download, and presign with the raw command objects:
 
 ```typescript
 import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
@@ -143,7 +176,7 @@ const url = await getSignedUrl(
 );
 ```
 
-This is exactly the pattern used end to end in the `with-ai-sdk` example (agent generates an image → `PutObject` into the `images` bucket → row inserted in Postgres → presigned URL returned), which is the canonical reference for pairing storage with the database on a branch.
+This raw-S3 pattern is used end to end in the `with-ai-sdk` example (agent generates an image → `PutObject` into the `images` bucket → row inserted in Postgres → presigned URL returned), the canonical reference for pairing storage with the database on a branch.
 
 A common app pattern: store the bucket key (not the bytes) in a Postgres column, and generate a presigned URL on read. Because both the row and the object live on the same branch, they branch together and never drift.
 
@@ -166,3 +199,4 @@ The Neon documentation is the source of truth and Object Storage is evolving rap
 - https://neon.com/docs/storage/authentication.md
 - https://neon.com/docs/storage/s3-compatibility.md
 - https://neon.com/docs/storage/troubleshooting.md
+- https://files-sdk.dev — Files SDK docs (the `neon` adapter)
