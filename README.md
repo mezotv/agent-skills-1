@@ -46,6 +46,24 @@ Provision instant temporary Postgres databases via Claimable Postgres by Neon ([
 
 Diagnose and fix excessive Postgres egress (network data transfer) in a codebase. Use when investigating high database bills, unexpected data transfer costs, or query overfetching.
 
+### Neon Object Storage
+
+[![neon-object-storage](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon-object-storage.svg?variant=branded&size=xs&label=neon-object-storage)](https://skills.sh/neondatabase/agent-skills/neon-object-storage)
+
+S3-compatible object storage that branches with your Neon project, so files and database rows stay in sync across dev, preview, and production environments.
+
+### Neon AI Gateway
+
+[![neon-ai-gateway](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon-ai-gateway.svg?variant=branded&size=xs&label=neon-ai-gateway)](https://skills.sh/neondatabase/agent-skills/neon-ai-gateway)
+
+One API and one Neon credential for frontier and open-source LLMs from multiple providers, built into your branch and compatible with the OpenAI, Anthropic, and Vercel AI SDKs.
+
+### Neon Functions
+
+[![neon-functions](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon-functions.svg?variant=branded&size=xs&label=neon-functions)](https://skills.sh/neondatabase/agent-skills/neon-functions)
+
+Long-running, serverless Node.js HTTP functions deployed onto your Neon branch, with `DATABASE_URL` injected automatically and compute that runs next to your data.
+
 ## Installation
 
 ```bash
