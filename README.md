@@ -18,31 +18,31 @@ It all starts with the `SKILL.md` file in the skill's directory. It's the entry 
 
 ### Neon
 
-[skills/neon](skills/neon/SKILL.md)
+[![neon](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon.svg?variant=branded&size=xs&label=neon)](https://skills.sh/neondatabase/agent-skills/neon)
 
 An overview of the Neon platform for apps and agents — Postgres, Auth, Data API, Object Storage, Compute Functions, and the AI Gateway — and how to get started.
 
 ### Neon Postgres
 
-[skills/neon-postgres](skills/neon-postgres/SKILL.md)
+[![neon-postgres](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon-postgres.svg?variant=branded&size=xs&label=neon-postgres)](https://skills.sh/neondatabase/agent-skills/neon-postgres)
 
 A comprehensive index of Neon Serverless Postgres documentation and best practices to set your agents up for success.
 
 ### Neon Postgres Branches
 
-[skills/neon-postgres-branches](skills/neon-postgres-branches/SKILL.md)
+[![neon-postgres-branches](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon-postgres-branches.svg?variant=branded&size=xs&label=neon-postgres-branches)](https://skills.sh/neondatabase/agent-skills/neon-postgres-branches)
 
 Choose and create the right Neon branch type for migration testing and isolated development workflows, including schema-only branches for sensitive data and reset-from-parent workflows to quickly realign child branches.
 
 ### Claimable Postgres
 
-[skills/claimable-postgres](skills/claimable-postgres/SKILL.md)
+[![claimable-postgres](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/claimable-postgres.svg?variant=branded&size=xs&label=claimable-postgres)](https://skills.sh/neondatabase/agent-skills/claimable-postgres)
 
 Provision instant temporary Postgres databases via Claimable Postgres by Neon ([neon.new](https://neon.new)) with no login, signup, or credit card. Supports REST API, CLI, and SDK.
 
 ### Neon Postgres Egress Optimizer
 
-[skills/neon-postgres-egress-optimizer](skills/neon-postgres-egress-optimizer/SKILL.md)
+[![neon-postgres-egress-optimizer](https://shieldcn.dev/skills/installs/neondatabase/agent-skills/neon-postgres-egress-optimizer.svg?variant=branded&size=xs&label=neon-postgres-egress-optimizer)](https://skills.sh/neondatabase/agent-skills/neon-postgres-egress-optimizer)
 
 Diagnose and fix excessive Postgres egress (network data transfer) in a codebase. Use when investigating high database bills, unexpected data transfer costs, or query overfetching.
 
